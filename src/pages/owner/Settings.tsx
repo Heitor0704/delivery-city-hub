@@ -30,7 +30,9 @@ import {
   CheckCircle2,
   ImagePlus,
   MapPin,
-  Plus
+  Plus,
+  Clock,
+  Trash2
 } from "lucide-react";
 
 interface EntregaRegiao {
@@ -54,6 +56,18 @@ interface MercadoPagoConfig {
   accessToken: string;
 }
 
+interface BusinessHours {
+  dayOfWeek: string;
+  isOpen: boolean;
+  intervals: TimeInterval[];
+}
+
+interface TimeInterval {
+  id: string;
+  start: string;
+  end: string;
+}
+
 interface EstablishmentData {
   nome: string;
   razaoSocial: string;
@@ -70,7 +84,18 @@ interface EstablishmentData {
   banner: string;
   mercadoPago: MercadoPagoConfig;
   entrega: EntregaConfig;
+  businessHours: BusinessHours[];
 }
+
+const daysOfWeek = [
+  { value: "sunday", label: "Domingo" },
+  { value: "monday", label: "Segunda-feira" },
+  { value: "tuesday", label: "Terça-feira" },
+  { value: "wednesday", label: "Quarta-feira" },
+  { value: "thursday", label: "Quinta-feira" },
+  { value: "friday", label: "Sexta-feira" },
+  { value: "saturday", label: "Sábado" }
+];
 
 const establishmentData: EstablishmentData = {
   nome: "Hambúrguer do Zé",
@@ -102,7 +127,61 @@ const establishmentData: EstablishmentData = {
       { nome: "Zona Sul", taxa: "7,00", tempo: "40-55" },
     ],
     taxaFixa: "5,00"
-  }
+  },
+  businessHours: [
+    { 
+      dayOfWeek: "monday", 
+      isOpen: true, 
+      intervals: [
+        { id: "1", start: "08:00", end: "12:00" },
+        { id: "2", start: "13:00", end: "22:00" }
+      ]
+    },
+    { 
+      dayOfWeek: "tuesday", 
+      isOpen: true, 
+      intervals: [
+        { id: "1", start: "08:00", end: "12:00" },
+        { id: "2", start: "13:00", end: "22:00" }
+      ]
+    },
+    { 
+      dayOfWeek: "wednesday", 
+      isOpen: true, 
+      intervals: [
+        { id: "1", start: "08:00", end: "12:00" },
+        { id: "2", start: "13:00", end: "22:00" }
+      ]
+    },
+    { 
+      dayOfWeek: "thursday", 
+      isOpen: true, 
+      intervals: [
+        { id: "1", start: "08:00", end: "12:00" },
+        { id: "2", start: "13:00", end: "22:00" }
+      ]
+    },
+    { 
+      dayOfWeek: "friday", 
+      isOpen: true, 
+      intervals: [
+        { id: "1", start: "08:00", end: "12:00" },
+        { id: "2", start: "13:00", end: "22:00" }
+      ]
+    },
+    { 
+      dayOfWeek: "saturday", 
+      isOpen: true, 
+      intervals: [
+        { id: "1", start: "09:00", end: "21:00" }
+      ]
+    },
+    { 
+      dayOfWeek: "sunday", 
+      isOpen: false, 
+      intervals: []
+    }
+  ]
 };
 
 export default function OwnerSettings() {
@@ -170,6 +249,105 @@ export default function OwnerSettings() {
     }
   };
 
+  const toggleDayStatus = (dayOfWeek: string) => {
+    setFormData(prev => {
+      const newBusinessHours = [...prev.businessHours];
+      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
+      
+      if (dayIndex !== -1) {
+        newBusinessHours[dayIndex] = {
+          ...newBusinessHours[dayIndex],
+          isOpen: !newBusinessHours[dayIndex].isOpen,
+          intervals: !newBusinessHours[dayIndex].isOpen ? [] : newBusinessHours[dayIndex].intervals
+        };
+      }
+      
+      return {
+        ...prev,
+        businessHours: newBusinessHours
+      };
+    });
+  };
+
+  const addTimeInterval = (dayOfWeek: string) => {
+    setFormData(prev => {
+      const newBusinessHours = [...prev.businessHours];
+      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
+      
+      if (dayIndex !== -1) {
+        const newId = (newBusinessHours[dayIndex].intervals.length + 1).toString();
+        
+        newBusinessHours[dayIndex] = {
+          ...newBusinessHours[dayIndex],
+          intervals: [
+            ...newBusinessHours[dayIndex].intervals,
+            { id: newId, start: "08:00", end: "18:00" }
+          ]
+        };
+      }
+      
+      return {
+        ...prev,
+        businessHours: newBusinessHours
+      };
+    });
+  };
+
+  const removeTimeInterval = (dayOfWeek: string, intervalId: string) => {
+    setFormData(prev => {
+      const newBusinessHours = [...prev.businessHours];
+      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
+      
+      if (dayIndex !== -1) {
+        newBusinessHours[dayIndex] = {
+          ...newBusinessHours[dayIndex],
+          intervals: newBusinessHours[dayIndex].intervals.filter(
+            interval => interval.id !== intervalId
+          )
+        };
+      }
+      
+      return {
+        ...prev,
+        businessHours: newBusinessHours
+      };
+    });
+  };
+
+  const updateTimeInterval = (
+    dayOfWeek: string, 
+    intervalId: string, 
+    field: keyof TimeInterval, 
+    value: string
+  ) => {
+    setFormData(prev => {
+      const newBusinessHours = [...prev.businessHours];
+      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
+      
+      if (dayIndex !== -1) {
+        const intervals = [...newBusinessHours[dayIndex].intervals];
+        const intervalIndex = intervals.findIndex(interval => interval.id === intervalId);
+        
+        if (intervalIndex !== -1) {
+          intervals[intervalIndex] = {
+            ...intervals[intervalIndex],
+            [field]: value
+          };
+          
+          newBusinessHours[dayIndex] = {
+            ...newBusinessHours[dayIndex],
+            intervals
+          };
+        }
+      }
+      
+      return {
+        ...prev,
+        businessHours: newBusinessHours
+      };
+    });
+  };
+
   const handleSaveSettings = () => {
     toast({
       title: "Configurações salvas",
@@ -195,6 +373,10 @@ export default function OwnerSettings() {
           <TabsTrigger value="delivery" className="flex-1 md:flex-none">
             <Truck className="mr-2 h-4 w-4" />
             Entregas
+          </TabsTrigger>
+          <TabsTrigger value="hours" className="flex-1 md:flex-none">
+            <Clock className="mr-2 h-4 w-4" />
+            Horários
           </TabsTrigger>
         </TabsList>
         
@@ -629,6 +811,109 @@ export default function OwnerSettings() {
                     </p>
                   </div>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="hours" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Horários de Funcionamento</CardTitle>
+              <CardDescription>
+                Configure os horários em que seu estabelecimento estará aberto para atendimento.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {daysOfWeek.map(day => {
+                  const dayData = formData.businessHours.find(d => d.dayOfWeek === day.value);
+                  const isOpen = dayData?.isOpen || false;
+                  
+                  return (
+                    <div key={day.value} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center">
+                          <h3 className="text-lg font-medium">{day.label}</h3>
+                          <div className="ml-4 flex items-center space-x-2">
+                            <Switch 
+                              id={`day-${day.value}`}
+                              checked={isOpen}
+                              onCheckedChange={() => toggleDayStatus(day.value)}
+                            />
+                            <Label htmlFor={`day-${day.value}`}>
+                              {isOpen ? "Aberto" : "Fechado"}
+                            </Label>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {isOpen && (
+                        <div className="space-y-4">
+                          <div className="text-sm text-muted-foreground mb-2">
+                            Defina os intervalos de horário em que o estabelecimento estará aberto:
+                          </div>
+                          
+                          {dayData?.intervals.map(interval => (
+                            <div key={interval.id} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
+                              <div className="sm:col-span-2">
+                                <Label htmlFor={`start-${day.value}-${interval.id}`}>Abertura</Label>
+                                <Input
+                                  id={`start-${day.value}-${interval.id}`}
+                                  type="time"
+                                  value={interval.start}
+                                  onChange={(e) => updateTimeInterval(
+                                    day.value, 
+                                    interval.id, 
+                                    'start', 
+                                    e.target.value
+                                  )}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div className="sm:col-span-2">
+                                <Label htmlFor={`end-${day.value}-${interval.id}`}>Fechamento</Label>
+                                <Input
+                                  id={`end-${day.value}-${interval.id}`}
+                                  type="time"
+                                  value={interval.end}
+                                  onChange={(e) => updateTimeInterval(
+                                    day.value, 
+                                    interval.id, 
+                                    'end', 
+                                    e.target.value
+                                  )}
+                                  className="mt-1"
+                                />
+                              </div>
+                              <div className="flex justify-end items-end">
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => removeTimeInterval(day.value, interval.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                          
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => addTimeInterval(day.value)}
+                            className="mt-2"
+                          >
+                            <Plus className="mr-2 h-4 w-4" />
+                            Adicionar Intervalo
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
