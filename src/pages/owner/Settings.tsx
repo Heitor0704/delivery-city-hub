@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -33,8 +34,48 @@ import {
   Plus
 } from "lucide-react";
 
+// Define proper types for our data structure
+interface EntregaRegiao {
+  nome: string;
+  taxa: string;
+  tempo: string;
+}
+
+interface EntregaConfig {
+  tipo: string;
+  valorKm: string;
+  taxaMinima: string;
+  tempoEstimado: string;
+  regioes: EntregaRegiao[];
+  taxaFixa: string;
+}
+
+interface MercadoPagoConfig {
+  ativo: boolean;
+  publicKey: string;
+  accessToken: string;
+}
+
+interface EstablishmentData {
+  nome: string;
+  razaoSocial: string;
+  cnpj: string;
+  telefone: string;
+  email: string;
+  endereco: string;
+  bairro: string;
+  cidade: string;
+  estado: string;
+  cep: string;
+  horarioFuncionamento: string;
+  logo: string;
+  banner: string;
+  mercadoPago: MercadoPagoConfig;
+  entrega: EntregaConfig;
+}
+
 // Dados de exemplo do estabelecimento
-const establishmentData = {
+const establishmentData: EstablishmentData = {
   nome: "Hambúrguer do Zé",
   razaoSocial: "José Restaurantes Ltda.",
   cnpj: "12.345.678/0001-90",
@@ -69,7 +110,7 @@ const establishmentData = {
 
 export default function OwnerSettings() {
   const [activeTab, setActiveTab] = useState("profile");
-  const [formData, setFormData] = useState(establishmentData);
+  const [formData, setFormData] = useState<EstablishmentData>(establishmentData);
   const [entregaTipo, setEntregaTipo] = useState(establishmentData.entrega.tipo);
   const [logoPreview, setLogoPreview] = useState(establishmentData.logo);
   const [bannerPreview, setBannerPreview] = useState(establishmentData.banner);
@@ -80,11 +121,11 @@ export default function OwnerSettings() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleNestedInputChange = (section: string, field: string, value: any) => {
+  const handleNestedInputChange = (section: keyof EstablishmentData, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [section]: {
-        ...prev[section as keyof typeof prev],
+        ...prev[section],
         [field]: value
       }
     }));
