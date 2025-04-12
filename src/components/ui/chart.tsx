@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -376,20 +375,21 @@ export const BarChart = ({
     };
   });
 
+  // Create a custom tooltip content renderer function
+  const renderTooltipContent = (props: any) => {
+    return <ChartTooltipContent 
+      {...props} 
+      formatter={valueFormatter ? (value: any) => valueFormatter(Number(value)) : undefined} 
+    />;
+  };
+
   return (
     <ChartContainer config={chartConfig} className={className}>
       <RechartsPrimitive.BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" vertical={false} />
         <RechartsPrimitive.XAxis dataKey="name" />
         <RechartsPrimitive.YAxis tickFormatter={valueFormatter} />
-        <RechartsPrimitive.Tooltip 
-          content={(props) => (
-            <ChartTooltipContent 
-              {...props} 
-              formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined} 
-            />
-          )} 
-        />
+        <RechartsPrimitive.Tooltip content={renderTooltipContent} />
         {categories.map((category, index) => (
           <RechartsPrimitive.Bar 
             key={category}
@@ -424,20 +424,21 @@ export const LineChart = ({
     };
   });
 
+  // Create a custom tooltip content renderer function
+  const renderTooltipContent = (props: any) => {
+    return <ChartTooltipContent 
+      {...props} 
+      formatter={valueFormatter ? (value: any) => valueFormatter(Number(value)) : undefined} 
+    />;
+  };
+
   return (
     <ChartContainer config={chartConfig} className={className}>
       <RechartsPrimitive.LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" vertical={false} />
         <RechartsPrimitive.XAxis dataKey="name" />
         <RechartsPrimitive.YAxis tickFormatter={valueFormatter} />
-        <RechartsPrimitive.Tooltip 
-          content={(props) => (
-            <ChartTooltipContent 
-              {...props} 
-              formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined} 
-            />
-          )} 
-        />
+        <RechartsPrimitive.Tooltip content={renderTooltipContent} />
         {categories.map((category, index) => (
           <RechartsPrimitive.Line
             key={category}
