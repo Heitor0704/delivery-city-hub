@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Bell, Menu } from "lucide-react";
+import { Bell, Menu, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -33,7 +33,7 @@ export function Header({ toggleSidebarMobile }: HeaderProps) {
   };
 
   return (
-    <header className="h-14 border-b flex items-center px-4 bg-background">
+    <header className="h-16 border-b flex items-center px-4 bg-background">
       <Button 
         variant="ghost" 
         size="icon" 
@@ -56,7 +56,7 @@ export function Header({ toggleSidebarMobile }: HeaderProps) {
           <Button variant="ghost" size="icon" className="relative">
             <Bell size={20} />
             {notifications > 0 && (
-              <span className="absolute top-0 right-0 w-4 h-4 bg-delivery-primary text-white rounded-full text-xs flex items-center justify-center animate-pulse-notification">
+              <span className="absolute top-0 right-0 w-4 h-4 bg-fomex-orange text-white rounded-full text-xs flex items-center justify-center animate-pulse-notification">
                 {notifications}
               </span>
             )}
@@ -65,12 +65,21 @@ export function Header({ toggleSidebarMobile }: HeaderProps) {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+            <Button variant="ghost" className="flex items-center gap-2 px-2">
               <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-delivery-primary text-white">
+                <AvatarFallback className="bg-fomex-orange text-white">
                   {user ? getInitials(user.email) : "U"}
                 </AvatarFallback>
               </Avatar>
+              <div className="hidden md:flex flex-col items-start text-sm">
+                <span className="font-medium">{user?.name || user?.email}</span>
+                <span className="text-xs text-muted-foreground">
+                  {user?.role === "owner" && "Estabelecimento"}
+                  {user?.role === "cityManager" && "Gerente"}
+                  {user?.role === "admin" && "Admin"}
+                </span>
+              </div>
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>

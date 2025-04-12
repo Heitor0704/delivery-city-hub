@@ -6,10 +6,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { 
-  Home, Store, Map, Users, Settings, CreditCard, FileText, 
-  Bell, Package, LogOut, ChevronLeft, ChevronRight, 
-  BarChart3, UserCog, Building
+  LayoutDashboard, PackageSearch, ClipboardList, Store, Users, Package, 
+  CreditCard, BarChart3, Settings, Building, Map, UserCog, LogOut, 
+  ChevronLeft, ChevronRight 
 } from "lucide-react";
+import { FomeXLogo } from "@/components/ui/logo";
 
 interface SidebarProps {
   className?: string;
@@ -28,8 +29,8 @@ function NavItem({ href, icon: Icon, title, isCollapsed, isActive }: NavItemProp
     <Link
       to={href}
       className={cn(
-        "flex items-center gap-2 rounded-lg px-3 py-2 text-sidebar-foreground transition-all hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-        isActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+        "flex items-center gap-3 rounded-md px-3 py-2 text-base transition-all hover:bg-fomex-orange/10 hover:text-fomex-orange",
+        isActive && "bg-fomex-orange/10 text-fomex-orange font-medium",
         isCollapsed ? "justify-center" : ""
       )}
     >
@@ -60,30 +61,32 @@ export function Sidebar({ className }: SidebarProps) {
   if (!mounted) return null;
 
   const ownerLinks = [
-    { href: "/owner-dashboard", icon: Home, title: "Dashboard" },
-    { href: "/owner/menu", icon: Store, title: "Cardápio" },
-    { href: "/owner/orders", icon: Package, title: "Pedidos" },
-    { href: "/owner/payments", icon: CreditCard, title: "Pagamentos" },
-    { href: "/owner/reports", icon: FileText, title: "Relatórios" },
+    { href: "/owner-dashboard", icon: LayoutDashboard, title: "Dashboard" },
+    { href: "/owner/orders", icon: PackageSearch, title: "Pedidos" },
+    { href: "/owner/menu", icon: ClipboardList, title: "Cardápio" },
+    { href: "/owner/products", icon: Package, title: "Produtos" },
+    { href: "/owner/payments", icon: CreditCard, title: "Financeiro" },
+    { href: "/owner/reports", icon: BarChart3, title: "Relatórios" },
     { href: "/owner/settings", icon: Settings, title: "Configurações" },
   ];
 
   const cityManagerLinks = [
-    { href: "/city-manager-dashboard", icon: Home, title: "Dashboard" },
+    { href: "/city-manager-dashboard", icon: LayoutDashboard, title: "Dashboard" },
     { href: "/city-manager/stores", icon: Store, title: "Estabelecimentos" },
     { href: "/city-manager/deliverers", icon: Users, title: "Entregadores" },
-    { href: "/city-manager/commissions", icon: CreditCard, title: "Comissões" },
-    { href: "/city-manager/categories", icon: FileText, title: "Categorias" },
+    { href: "/city-manager/registrations", icon: ClipboardList, title: "Cadastros" },
+    { href: "/city-manager/commissions", icon: CreditCard, title: "Financeiro" },
     { href: "/city-manager/reports", icon: BarChart3, title: "Relatórios" },
     { href: "/city-manager/settings", icon: Settings, title: "Configurações" },
   ];
 
   const adminLinks = [
-    { href: "/admin-dashboard", icon: Home, title: "Dashboard" },
+    { href: "/admin-dashboard", icon: LayoutDashboard, title: "Dashboard" },
     { href: "/admin/cities", icon: Map, title: "Cidades" },
     { href: "/admin/managers", icon: UserCog, title: "Gerentes" },
     { href: "/admin/companies", icon: Building, title: "Empresas" },
-    { href: "/admin/commissions", icon: CreditCard, title: "Comissões" },
+    { href: "/admin/registrations", icon: ClipboardList, title: "Cadastros" },
+    { href: "/admin/financials", icon: CreditCard, title: "Financeiro" },
     { href: "/admin/reports", icon: BarChart3, title: "Relatórios" },
     { href: "/admin/settings", icon: Settings, title: "Configurações" },
   ];
@@ -106,31 +109,43 @@ export function Sidebar({ className }: SidebarProps) {
   return (
     <div
       className={cn(
-        "flex flex-col bg-sidebar border-r border-sidebar-border transition-all duration-300",
-        isCollapsed ? "w-[60px]" : "w-64",
+        "flex flex-col bg-white border-r border-gray-200 shadow-sm transition-all duration-300",
+        isCollapsed ? "w-[70px]" : "w-64",
         className
       )}
     >
       <div className={cn(
-        "h-14 flex items-center px-4 py-2",
-        isCollapsed ? "justify-center" : "justify-between"
+        "h-16 flex items-center py-2",
+        isCollapsed ? "justify-center px-2" : "px-4"
       )}>
-        {!isCollapsed && (
-          <div className="flex items-center">
-            <span className="font-bold text-sidebar-foreground">Delivery Hub</span>
+        {!isCollapsed ? (
+          <div className="flex items-center justify-between w-full">
+            <FomeXLogo isCollapsed={false} />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-gray-500" 
+              onClick={toggleSidebar}
+            >
+              <ChevronLeft size={18} />
+            </Button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full">
+            <FomeXLogo isCollapsed={true} />
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-gray-500 absolute right-0 top-5" 
+              onClick={toggleSidebar}
+            >
+              <ChevronRight size={18} />
+            </Button>
           </div>
         )}
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="text-sidebar-foreground" 
-          onClick={toggleSidebar}
-        >
-          {isCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </Button>
       </div>
       
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 pt-2">
         <nav className="grid gap-1 px-2 py-3">
           {links.map((link) => (
             <NavItem
@@ -145,11 +160,11 @@ export function Sidebar({ className }: SidebarProps) {
         </nav>
       </ScrollArea>
       
-      <div className="mt-auto border-t border-sidebar-border p-2">
+      <div className="mt-auto border-t border-gray-200 p-2">
         <Button 
           variant="ghost" 
           className={cn(
-            "w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            "w-full flex items-center gap-3 text-gray-700 hover:text-fomex-orange hover:bg-fomex-orange/10 rounded-md px-3 py-2",
             isCollapsed ? "justify-center" : ""
           )}
           asChild

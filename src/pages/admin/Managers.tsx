@@ -1,0 +1,21 @@
+
+import { PageLayout } from "@/components/layout/PageLayout";
+import { Card } from "@/components/ui/card";
+
+export default function AdminManagers() {
+  return (
+    <PageLayout 
+      title="Gerenciar Gerentes"
+      description="Visualize e gerencie os gerentes de cidade."
+    >
+      <Card className="p-6">
+        <div className="flex flex-col items-center justify-center py-12">
+          <h3 className="text-lg font-semibold mb-2">Página de Gerentes em Construção</h3>
+          <p className="text-muted-foreground text-center max-w-md">
+            Esta página está sendo desenvolvida. Em breve você poderá gerenciar todos os gerentes de cidade.
+          </p>
+        </div>
+      </Card>
+    </PageLayout>
+  );
+}

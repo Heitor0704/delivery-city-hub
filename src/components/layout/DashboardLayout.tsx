@@ -12,7 +12,7 @@ export default function DashboardLayout() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50">
       {/* Sidebar para desktop */}
       <div className="hidden md:block h-full">
         <Sidebar />
@@ -37,7 +37,7 @@ export default function DashboardLayout() {
 
       <div className="flex flex-col flex-1 overflow-hidden">
         <Header toggleSidebarMobile={toggleSidebarMobile} />
-        <main className="flex-1 overflow-auto p-4">
+        <main className="flex-1 overflow-auto p-6">
           <Outlet />
         </main>
       </div>

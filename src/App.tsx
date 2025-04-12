@@ -14,6 +14,31 @@ import CityManagerDashboard from "@/pages/CityManagerDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import NotFoundPage from "@/pages/NotFoundPage";
 
+// Owner pages
+import OwnerOrders from "@/pages/owner/Orders";
+import OwnerMenu from "@/pages/owner/Menu";
+import OwnerProducts from "@/pages/owner/Products";
+import OwnerPayments from "@/pages/owner/Payments";
+import OwnerReports from "@/pages/owner/Reports";
+import OwnerSettings from "@/pages/owner/Settings";
+
+// City Manager pages
+import CityManagerStores from "@/pages/city-manager/Stores";
+import CityManagerDeliverers from "@/pages/city-manager/Deliverers";
+import CityManagerRegistrations from "@/pages/city-manager/Registrations";
+import CityManagerCommissions from "@/pages/city-manager/Commissions";
+import CityManagerReports from "@/pages/city-manager/Reports";
+import CityManagerSettings from "@/pages/city-manager/Settings";
+
+// Admin pages
+import AdminCities from "@/pages/admin/Cities";
+import AdminManagers from "@/pages/admin/Managers";
+import AdminCompanies from "@/pages/admin/Companies";
+import AdminRegistrations from "@/pages/admin/Registrations";
+import AdminFinancials from "@/pages/admin/Financials";
+import AdminReports from "@/pages/admin/Reports";
+import AdminSettings from "@/pages/admin/Settings";
+
 const queryClient = new QueryClient();
 
 // Componente de proteção de rota
@@ -72,29 +97,31 @@ const App = () => (
               
               {/* Rotas do dono do estabelecimento */}
               <Route path="/owner-dashboard" element={<OwnerDashboard />} />
-              <Route path="/owner/menu" element={<div className="p-4">Página de Cardápio em construção</div>} />
-              <Route path="/owner/orders" element={<div className="p-4">Página de Pedidos em construção</div>} />
-              <Route path="/owner/payments" element={<div className="p-4">Página de Pagamentos em construção</div>} />
-              <Route path="/owner/reports" element={<div className="p-4">Página de Relatórios em construção</div>} />
-              <Route path="/owner/settings" element={<div className="p-4">Página de Configurações em construção</div>} />
+              <Route path="/owner/orders" element={<OwnerOrders />} />
+              <Route path="/owner/menu" element={<OwnerMenu />} />
+              <Route path="/owner/products" element={<OwnerProducts />} />
+              <Route path="/owner/payments" element={<OwnerPayments />} />
+              <Route path="/owner/reports" element={<OwnerReports />} />
+              <Route path="/owner/settings" element={<OwnerSettings />} />
 
               {/* Rotas do gerente da cidade */}
               <Route path="/city-manager-dashboard" element={<CityManagerDashboard />} />
-              <Route path="/city-manager/stores" element={<div className="p-4">Página de Estabelecimentos em construção</div>} />
-              <Route path="/city-manager/deliverers" element={<div className="p-4">Página de Entregadores em construção</div>} />
-              <Route path="/city-manager/commissions" element={<div className="p-4">Página de Comissões em construção</div>} />
-              <Route path="/city-manager/categories" element={<div className="p-4">Página de Categorias em construção</div>} />
-              <Route path="/city-manager/reports" element={<div className="p-4">Página de Relatórios em construção</div>} />
-              <Route path="/city-manager/settings" element={<div className="p-4">Página de Configurações em construção</div>} />
+              <Route path="/city-manager/stores" element={<CityManagerStores />} />
+              <Route path="/city-manager/deliverers" element={<CityManagerDeliverers />} />
+              <Route path="/city-manager/registrations" element={<CityManagerRegistrations />} />
+              <Route path="/city-manager/commissions" element={<CityManagerCommissions />} />
+              <Route path="/city-manager/reports" element={<CityManagerReports />} />
+              <Route path="/city-manager/settings" element={<CityManagerSettings />} />
 
               {/* Rotas do administrador */}
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/cities" element={<div className="p-4">Página de Cidades em construção</div>} />
-              <Route path="/admin/managers" element={<div className="p-4">Página de Gerentes em construção</div>} />
-              <Route path="/admin/companies" element={<div className="p-4">Página de Empresas em construção</div>} />
-              <Route path="/admin/commissions" element={<div className="p-4">Página de Comissões em construção</div>} />
-              <Route path="/admin/reports" element={<div className="p-4">Página de Relatórios em construção</div>} />
-              <Route path="/admin/settings" element={<div className="p-4">Página de Configurações em construção</div>} />
+              <Route path="/admin/cities" element={<AdminCities />} />
+              <Route path="/admin/managers" element={<AdminManagers />} />
+              <Route path="/admin/companies" element={<AdminCompanies />} />
+              <Route path="/admin/registrations" element={<AdminRegistrations />} />
+              <Route path="/admin/financials" element={<AdminFinancials />} />
+              <Route path="/admin/reports" element={<AdminReports />} />
+              <Route path="/admin/settings" element={<AdminSettings />} />
 
               {/* Rotas compartilhadas */}
               <Route path="/profile" element={<div className="p-4">Página de Perfil em construção</div>} />
