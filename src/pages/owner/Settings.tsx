@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -34,7 +33,6 @@ import {
   Plus
 } from "lucide-react";
 
-// Define proper types for our data structure
 interface EntregaRegiao {
   nome: string;
   taxa: string;
@@ -74,7 +72,6 @@ interface EstablishmentData {
   entrega: EntregaConfig;
 }
 
-// Dados de exemplo do estabelecimento
 const establishmentData: EstablishmentData = {
   nome: "Hambúrguer do Zé",
   razaoSocial: "José Restaurantes Ltda.",
@@ -121,20 +118,26 @@ export default function OwnerSettings() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Fix the type error by adding more specific types
   const handleNestedInputChange = (section: keyof EstablishmentData, field: string, value: any) => {
     setFormData(prev => {
-      // Create a type-safe copy of the section
-      const sectionData = { ...prev[section] };
-      
-      // Update the field in the copied section
-      return {
-        ...prev,
-        [section]: {
-          ...sectionData,
-          [field]: value
-        }
-      };
+      if (section === 'mercadoPago') {
+        return {
+          ...prev,
+          mercadoPago: {
+            ...prev.mercadoPago,
+            [field]: value
+          }
+        };
+      } else if (section === 'entrega') {
+        return {
+          ...prev,
+          entrega: {
+            ...prev.entrega,
+            [field]: value
+          }
+        };
+      }
+      return prev;
     });
   };
 
@@ -168,7 +171,6 @@ export default function OwnerSettings() {
   };
 
   const handleSaveSettings = () => {
-    // Em um ambiente real, aqui faríamos uma chamada à API
     toast({
       title: "Configurações salvas",
       description: "As configurações foram salvas com sucesso.",
