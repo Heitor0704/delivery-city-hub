@@ -121,14 +121,21 @@ export default function OwnerSettings() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Fix the type error by adding more specific types
   const handleNestedInputChange = (section: keyof EstablishmentData, field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value
-      }
-    }));
+    setFormData(prev => {
+      // Create a type-safe copy of the section
+      const sectionData = { ...prev[section] };
+      
+      // Update the field in the copied section
+      return {
+        ...prev,
+        [section]: {
+          ...sectionData,
+          [field]: value
+        }
+      };
+    });
   };
 
   const handleEntregaTipoChange = (tipo: string) => {
