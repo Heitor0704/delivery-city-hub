@@ -72,10 +72,16 @@ export default {
                     foreground: '#ffffff'
                 },
                 delivery: {
-                    primary: '#E53935',
-                    secondary: '#1E3A8A',
-                    light: '#FECACA',
-                    dark: '#7F1D1D'
+                    primary: '#FF5722', // FomeX orange
+                    secondary: '#3E2723', // Dark brown
+                    light: '#FBE9E7', // Light orange
+                    dark: '#BF360C', // Dark orange
+                    accent: '#E6CDB5' // Beige accent from logo
+                },
+                fomex: {
+                    orange: '#FF5722',
+                    beige: '#E6CDB5',
+                    dark: '#333333'
                 }
 			},
 			borderRadius: {
