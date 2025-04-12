@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -30,7 +29,8 @@ import {
   Truck, 
   CheckCircle2,
   ImagePlus,
-  MapPin
+  MapPin,
+  Plus
 } from "lucide-react";
 
 // Dados de exemplo do estabelecimento

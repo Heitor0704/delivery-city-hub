@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -248,7 +247,6 @@ export default function OwnerReports() {
               <BarChart
                 data={salesChartData}
                 categories={["value"]}
-                index="name"
                 colors={["#E53935"]}
                 valueFormatter={(value: number) =>
                   `R$ ${value.toLocaleString("pt-BR")}`
@@ -307,7 +305,6 @@ export default function OwnerReports() {
               <BarChart
                 data={productsChartData}
                 categories={["value"]}
-                index="name"
                 colors={["#1E3A8A"]}
                 valueFormatter={(value: number) =>
                   `${value} unidades`

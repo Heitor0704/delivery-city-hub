@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
@@ -29,10 +28,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Dropdown,
-  DropdownContent,
-  DropdownItem,
-  DropdownTrigger,
+  DropdownMenu as Dropdown,
+  DropdownMenuContent as DropdownContent,
+  DropdownMenuItem as DropdownItem,
+  DropdownMenuTrigger as DropdownTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, Search, Filter, Printer, MoreVertical, Eye } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
