@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -352,6 +353,106 @@ function getPayloadConfigFromPayload(
     ? config[configLabelKey]
     : config[key as keyof typeof config]
 }
+
+// Add these new components for BarChart and LineChart
+export const BarChart = ({ 
+  data, 
+  categories, 
+  colors, 
+  valueFormatter, 
+  className 
+}: { 
+  data: any[];
+  categories: string[];
+  colors: string[];
+  valueFormatter?: (value: number) => string;
+  className?: string;
+}) => {
+  const chartConfig: ChartConfig = {};
+  
+  categories.forEach((category, index) => {
+    chartConfig[category] = {
+      color: colors[index],
+    };
+  });
+
+  return (
+    <ChartContainer config={chartConfig} className={className}>
+      <RechartsPrimitive.BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <RechartsPrimitive.XAxis dataKey="name" />
+        <RechartsPrimitive.YAxis tickFormatter={valueFormatter} />
+        <RechartsPrimitive.Tooltip 
+          content={(props) => (
+            <ChartTooltipContent 
+              {...props} 
+              formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined} 
+            />
+          )} 
+        />
+        {categories.map((category, index) => (
+          <RechartsPrimitive.Bar 
+            key={category}
+            dataKey={category} 
+            fill={colors[index]} 
+            radius={[4, 4, 0, 0]}
+          />
+        ))}
+      </RechartsPrimitive.BarChart>
+    </ChartContainer>
+  );
+};
+
+export const LineChart = ({ 
+  data, 
+  categories, 
+  colors, 
+  valueFormatter, 
+  className 
+}: { 
+  data: any[];
+  categories: string[];
+  colors: string[];
+  valueFormatter?: (value: number) => string;
+  className?: string;
+}) => {
+  const chartConfig: ChartConfig = {};
+  
+  categories.forEach((category, index) => {
+    chartConfig[category] = {
+      color: colors[index],
+    };
+  });
+
+  return (
+    <ChartContainer config={chartConfig} className={className}>
+      <RechartsPrimitive.LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <RechartsPrimitive.CartesianGrid strokeDasharray="3 3" vertical={false} />
+        <RechartsPrimitive.XAxis dataKey="name" />
+        <RechartsPrimitive.YAxis tickFormatter={valueFormatter} />
+        <RechartsPrimitive.Tooltip 
+          content={(props) => (
+            <ChartTooltipContent 
+              {...props} 
+              formatter={valueFormatter ? (value) => valueFormatter(Number(value)) : undefined} 
+            />
+          )} 
+        />
+        {categories.map((category, index) => (
+          <RechartsPrimitive.Line
+            key={category}
+            type="monotone"
+            dataKey={category}
+            stroke={colors[index]}
+            strokeWidth={2}
+            dot={{ r: 4, strokeWidth: 2 }}
+            activeDot={{ r: 6, strokeWidth: 0 }}
+          />
+        ))}
+      </RechartsPrimitive.LineChart>
+    </ChartContainer>
+  );
+};
 
 export {
   ChartContainer,
