@@ -20,7 +20,24 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Filter } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Dropdown,
+  DropdownContent,
+  DropdownItem,
+  DropdownTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Search, Filter, Printer, MoreVertical, Eye } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { OrderDetails } from "@/components/order/OrderDetails";
+import { OrderStatusSelect } from "@/components/order/OrderStatusSelect";
 
 const statusColors: Record<string, string> = {
   aguardando: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
@@ -38,6 +55,15 @@ const orders = [
     data: "12/04/2023 14:30",
     status: "aguardando",
     endereco: "Rua das Flores, 123",
+    itens: [
+      { nome: "X-Tudo", quantidade: 1, valor: "R$ 28,90", observacao: "Sem cebola" },
+      { nome: "Coca-Cola 350ml", quantidade: 2, valor: "R$ 13,00", observacao: "" },
+      { nome: "Batata Frita Grande", quantidade: 1, valor: "R$ 13,00", observacao: "Bem passada" },
+    ],
+    pagamento: "Cartão de crédito",
+    taxaEntrega: "R$ 5,00",
+    total: "R$ 59,90",
+    telefone: "(11) 98765-4321"
   },
   {
     id: "#PED-1235",
@@ -46,6 +72,14 @@ const orders = [
     data: "12/04/2023 14:20",
     status: "preparando",
     endereco: "Av. Principal, 456",
+    itens: [
+      { nome: "X-Salada", quantidade: 1, valor: "R$ 22,90", observacao: "" },
+      { nome: "Suco de Laranja", quantidade: 1, valor: "R$ 7,50", observacao: "Sem gelo" }
+    ],
+    pagamento: "Dinheiro",
+    taxaEntrega: "R$ 5,00",
+    total: "R$ 37,50",
+    telefone: "(11) 91234-5678"
   },
   {
     id: "#PED-1236",
@@ -54,6 +88,15 @@ const orders = [
     data: "12/04/2023 14:05",
     status: "entregando",
     endereco: "Rua das Árvores, 789",
+    itens: [
+      { nome: "Pizza Grande Calabresa", quantidade: 1, valor: "R$ 49,90", observacao: "Borda com catupiry" },
+      { nome: "Refrigerante 2L", quantidade: 1, valor: "R$ 12,00", observacao: "" },
+      { nome: "Sobremesa Petit Gateau", quantidade: 1, valor: "R$ 17,00", observacao: "" }
+    ],
+    pagamento: "Pix",
+    taxaEntrega: "R$ 5,00",
+    total: "R$ 83,90",
+    telefone: "(11) 97890-1234"
   },
   {
     id: "#PED-1237",
@@ -62,6 +105,13 @@ const orders = [
     data: "12/04/2023 13:50",
     status: "entregue",
     endereco: "Rua da Praça, 101",
+    itens: [
+      { nome: "Combo Hamburguer + Batata + Refrigerante", quantidade: 1, valor: "R$ 40,00", observacao: "" }
+    ],
+    pagamento: "Cartão de débito",
+    taxaEntrega: "R$ 5,00",
+    total: "R$ 45,00",
+    telefone: "(11) 95678-9012"
   },
   {
     id: "#PED-1238",
@@ -70,12 +120,24 @@ const orders = [
     data: "12/04/2023 13:45",
     status: "cancelado",
     endereco: "Av. Central, 202",
+    itens: [
+      { nome: "Sanduíche Natural", quantidade: 1, valor: "R$ 15,90", observacao: "" },
+      { nome: "Água Mineral", quantidade: 1, valor: "R$ 3,90", observacao: "" },
+      { nome: "Salada de Frutas", quantidade: 1, valor: "R$ 8,00", observacao: "" }
+    ],
+    pagamento: "Mercado Pago",
+    taxaEntrega: "R$ 5,00",
+    total: "R$ 32,80",
+    telefone: "(11) 94321-8765"
   },
 ];
 
 export default function OwnerOrders() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const { toast } = useToast();
 
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
@@ -86,6 +148,91 @@ export default function OwnerOrders() {
     
     return matchesSearch && matchesStatus;
   });
+
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    // Em um ambiente real, aqui faríamos uma chamada à API para atualizar o status
+    // Por enquanto, apenas mostramos um toast de confirmação
+    toast({
+      title: "Status atualizado",
+      description: `Pedido ${orderId} teve seu status alterado para ${newStatus}`,
+    });
+  };
+
+  const handlePrintOrder = (order: any) => {
+    // Abre uma nova janela para impressão
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Erro ao imprimir",
+        description: "Não foi possível abrir a janela de impressão. Verifique se o bloqueador de pop-ups está ativado.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Conteúdo HTML para impressão
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Imprimir Pedido ${order.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            h1 { text-align: center; }
+            .order-header { margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px; }
+            .order-items { margin-bottom: 20px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { text-align: left; padding: 8px; }
+            th { border-bottom: 1px solid #ddd; }
+            .total-row { font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <h1>Pedido ${order.id}</h1>
+          <div class="order-header">
+            <p><strong>Cliente:</strong> ${order.cliente}</p>
+            <p><strong>Telefone:</strong> ${order.telefone}</p>
+            <p><strong>Endereço:</strong> ${order.endereco}</p>
+            <p><strong>Data:</strong> ${order.data}</p>
+            <p><strong>Forma de Pagamento:</strong> ${order.pagamento}</p>
+          </div>
+          <div class="order-items">
+            <h2>Itens do Pedido</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Qtd</th>
+                  <th>Valor</th>
+                  <th>Observação</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${order.itens.map(item => `
+                  <tr>
+                    <td>${item.nome}</td>
+                    <td>${item.quantidade}</td>
+                    <td>${item.valor}</td>
+                    <td>${item.observacao}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="order-total">
+            <p><strong>Taxa de Entrega:</strong> ${order.taxaEntrega}</p>
+            <p><strong>Total:</strong> ${order.total}</p>
+          </div>
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    // Aguarda o carregamento do conteúdo
+    printWindow.onload = function() {
+      printWindow.print();
+      // printWindow.close();
+    };
+  };
 
   return (
     <PageLayout 
@@ -141,27 +288,54 @@ export default function OwnerOrders() {
                   <TableHead>Data</TableHead>
                   <TableHead>Endereço</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredOrders.length > 0 ? (
                   filteredOrders.map((order) => (
-                    <TableRow key={order.id} className="cursor-pointer hover:bg-muted/50">
+                    <TableRow key={order.id}>
                       <TableCell className="font-medium">{order.id}</TableCell>
                       <TableCell>{order.cliente}</TableCell>
                       <TableCell>{order.valor}</TableCell>
                       <TableCell>{order.data}</TableCell>
                       <TableCell className="max-w-[200px] truncate">{order.endereco}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className={statusColors[order.status]}>
-                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </Badge>
+                        <OrderStatusSelect 
+                          orderId={order.id}
+                          currentStatus={order.status}
+                          onStatusChange={(status) => handleStatusChange(order.id, status)}
+                        />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end">
+                          <Dropdown>
+                            <DropdownTrigger asChild>
+                              <Button variant="ghost" size="icon">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownTrigger>
+                            <DropdownContent align="end">
+                              <DropdownItem onClick={() => {
+                                setSelectedOrder(order);
+                                setOrderDetailsOpen(true);
+                              }}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Visualizar detalhes
+                              </DropdownItem>
+                              <DropdownItem onClick={() => handlePrintOrder(order)}>
+                                <Printer className="mr-2 h-4 w-4" />
+                                Imprimir pedido
+                              </DropdownItem>
+                            </DropdownContent>
+                          </Dropdown>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-6 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
                       Nenhum pedido encontrado.
                     </TableCell>
                   </TableRow>
@@ -171,6 +345,16 @@ export default function OwnerOrders() {
           </CardContent>
         </Card>
       </div>
+
+      {selectedOrder && (
+        <OrderDetails
+          order={selectedOrder}
+          open={orderDetailsOpen}
+          onOpenChange={setOrderDetailsOpen}
+          onPrint={() => handlePrintOrder(selectedOrder)}
+          onStatusChange={(status) => handleStatusChange(selectedOrder.id, status)}
+        />
+      )}
     </PageLayout>
   );
 }
