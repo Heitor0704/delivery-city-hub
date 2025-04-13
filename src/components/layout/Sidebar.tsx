@@ -6,9 +6,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { 
-  LayoutDashboard, PackageSearch, ClipboardList, Store, Users, Package, 
+  LayoutDashboard, ClipboardList, Store, Users, Package, 
   CreditCard, BarChart3, Settings, Building, Map, UserCog, LogOut, 
-  ChevronLeft, ChevronRight, ShoppingBag
+  ChevronLeft, ChevronRight, ShoppingBag, Ticket
 } from "lucide-react";
 import { FomeXLogo } from "@/components/ui/logo";
 
@@ -62,7 +62,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   const ownerLinks = [
     { href: "/owner-dashboard", icon: LayoutDashboard, title: "Dashboard" },
-    { href: "/owner/orders", icon: PackageSearch, title: "Pedidos" },
+    { href: "/owner/orders", icon: ShoppingBag, title: "Pedidos" },
     { href: "/owner/menu", icon: ClipboardList, title: "Cardápio" },
     { href: "/owner/products", icon: Package, title: "Produtos" },
     { href: "/owner/payments", icon: CreditCard, title: "Financeiro" },
@@ -85,8 +85,8 @@ export function Sidebar({ className }: SidebarProps) {
     { href: "/admin-dashboard", icon: LayoutDashboard, title: "Dashboard" },
     { href: "/admin/cities", icon: Map, title: "Cidades" },
     { href: "/admin/managers", icon: UserCog, title: "Gerentes" },
-    { href: "/admin/companies", icon: Building, title: "Empresas" },
-    { href: "/admin/registrations", icon: ClipboardList, title: "Cadastros" },
+    { href: "/admin/companies", icon: Store, title: "Estabelecimentos" },
+    { href: "/admin/coupons", icon: Ticket, title: "Cupons e Promoções" },
     { href: "/admin/financials", icon: CreditCard, title: "Financeiro" },
     { href: "/admin/reports", icon: BarChart3, title: "Relatórios" },
     { href: "/admin/settings", icon: Settings, title: "Configurações" },
