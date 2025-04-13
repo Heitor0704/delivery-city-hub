@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,24 +20,21 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 export default function AdminSettings() {
-  const [activeTab, setActiveTab] = useState("profile");
   const { toast } = useToast();
   
-  // App commission settings
+  const [activeTab, setActiveTab] = useState("profile");
+  
   const [defaultAppCommission, setDefaultAppCommission] = useState("10");
   const [defaultDeliveryCommission, setDefaultDeliveryCommission] = useState("5");
   const [defaultTaxRate, setDefaultTaxRate] = useState("2.5");
   
-  // Payment settings
   const [mercadoPagoEnabled, setMercadoPagoEnabled] = useState(true);
   const [pixEnabled, setPixEnabled] = useState(true);
   const [cashEnabled, setCashEnabled] = useState(true);
   
-  // Mercado Pago credentials
   const [accessToken, setAccessToken] = useState("");
   const [publicKey, setPublicKey] = useState("");
   
-  // Bank account details
   const [bankName, setBankName] = useState("");
   const [accountType, setAccountType] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -47,7 +43,6 @@ export default function AdminSettings() {
   
   const [isLoading, setIsLoading] = useState(false);
   
-  // Notification settings state
   const [newCityNotif, setNewCityNotif] = useState(true);
   const [newManagerNotif, setNewManagerNotif] = useState(true);
   const [systemAlertNotif, setSystemAlertNotif] = useState(true);
@@ -55,7 +50,6 @@ export default function AdminSettings() {
   const handleCommissionSave = () => {
     setIsLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       toast({
@@ -68,7 +62,6 @@ export default function AdminSettings() {
   const handlePaymentSave = () => {
     setIsLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       toast({
@@ -81,7 +74,6 @@ export default function AdminSettings() {
   const handleNotificationSettingsSave = () => {
     setIsLoading(true);
     
-    // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
       toast({
@@ -98,19 +90,17 @@ export default function AdminSettings() {
     >
       <div className="space-y-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 md:grid-cols-4 lg:w-auto">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-3 lg:w-auto">
             <TabsTrigger value="profile">Perfil</TabsTrigger>
             <TabsTrigger value="commission">Comissões</TabsTrigger>
             <TabsTrigger value="payments">Pagamentos</TabsTrigger>
             <TabsTrigger value="notifications">Notificações</TabsTrigger>
           </TabsList>
           
-          {/* Profile Tab */}
           <TabsContent value="profile" className="space-y-4">
             <ProfileSettings />
           </TabsContent>
           
-          {/* Commission Tab */}
           <TabsContent value="commission" className="space-y-4">
             <Card>
               <CardHeader>
@@ -202,9 +192,7 @@ export default function AdminSettings() {
             </Card>
           </TabsContent>
           
-          {/* Payments Tab */}
           <TabsContent value="payments" className="space-y-4">
-            {/* Mercado Pago */}
             <Card>
               <CardHeader>
                 <CardTitle>Configurações do Mercado Pago</CardTitle>
@@ -241,7 +229,6 @@ export default function AdminSettings() {
               </CardContent>
             </Card>
             
-            {/* Bank Account */}
             <Card>
               <CardHeader>
                 <CardTitle>Dados Bancários</CardTitle>
@@ -306,86 +293,21 @@ export default function AdminSettings() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* Payment Methods */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Métodos de Pagamento</CardTitle>
-                <CardDescription>
-                  Ative ou desative os métodos de pagamento disponíveis no sistema.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <CreditCard className="h-5 w-5" />
-                      <div>
-                        <Label htmlFor="mercadoPago">Mercado Pago</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Habilitar pagamentos via Mercado Pago.
-                        </p>
-                      </div>
-                    </div>
-                    <Switch 
-                      id="mercadoPago" 
-                      checked={mercadoPagoEnabled} 
-                      onCheckedChange={setMercadoPagoEnabled}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <DollarSign className="h-5 w-5" />
-                      <div>
-                        <Label htmlFor="pix">PIX</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Habilitar pagamentos via PIX.
-                        </p>
-                      </div>
-                    </div>
-                    <Switch 
-                      id="pix" 
-                      checked={pixEnabled} 
-                      onCheckedChange={setPixEnabled}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <Banknote className="h-5 w-5" />
-                      <div>
-                        <Label htmlFor="cash">Dinheiro</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Habilitar pagamentos em dinheiro.
-                        </p>
-                      </div>
-                    </div>
-                    <Switch 
-                      id="cash" 
-                      checked={cashEnabled} 
-                      onCheckedChange={setCashEnabled}
-                    />
-                  </div>
-                </div>
-                
-                <div className="pt-4 flex justify-end">
-                  <Button onClick={handlePaymentSave} disabled={isLoading}>
-                    {isLoading ? (
-                      <>Salvando...</>
-                    ) : (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Salvar Configurações
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            
+            <div className="pt-4 flex justify-end">
+              <Button onClick={handlePaymentSave} disabled={isLoading}>
+                {isLoading ? (
+                  <>Salvando...</>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar Configurações
+                  </>
+                )}
+              </Button>
+            </div>
           </TabsContent>
           
-          {/* Notifications Tab */}
           <TabsContent value="notifications" className="space-y-4">
             <Card>
               <CardHeader>
