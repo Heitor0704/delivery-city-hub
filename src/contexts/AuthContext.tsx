@@ -16,7 +16,7 @@ interface UserData {
   telefone: string | null;
   tipo_usuario: string | null;
   user_id: string;
-  avatar?: string; // Make avatar optional since it's not in the original data
+  // Note: avatar is not defined in the Usuarios table
 }
 
 type UserRole = "admin" | "cityManager" | "owner";
@@ -79,7 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 email: currentSession.user.email || "",
                 name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
                 role: userData.tipo_usuario as UserRole,
-                avatar: userData.avatar, // This might be undefined, which is fine
+                // avatar is defined in our User interface but not in the database
+                // so we don't set it here
               };
               
               setUser(userInfo);
@@ -120,7 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: currentSession.user.email || "",
               name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
               role: userData.tipo_usuario as UserRole,
-              avatar: userData.avatar, // This might be undefined, which is fine
+              // avatar is defined in our User interface but not in the database
+              // so we don't set it here
             };
             
             setUser(userInfo);
