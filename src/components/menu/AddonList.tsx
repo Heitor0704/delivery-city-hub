@@ -12,7 +12,12 @@ const addons = [
   { id: 5, nome: "Ovo", preco: "R$ 2,50", ativo: false },
 ];
 
-export function AddonList() {
+interface AddonListProps {
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => void;
+}
+
+export function AddonList({ onEdit, onDelete }: AddonListProps) {
   return (
     <Card>
       <CardContent className="p-0">
@@ -39,10 +44,19 @@ export function AddonList() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Button variant="outline" size="icon">
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      onClick={() => onEdit && onEdit(addon.id.toString())}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="icon" className="text-destructive">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="text-destructive"
+                      onClick={() => onDelete && onDelete(addon.id.toString())}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>

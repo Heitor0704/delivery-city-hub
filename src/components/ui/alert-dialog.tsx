@@ -1,8 +1,11 @@
+
 import * as React from "react"
 import * as AlertDialogPrimitive from "@radix-ui/react-alert-dialog"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { type VariantProps } from "class-variance-authority"
+import { Button } from "./button"
 
 const AlertDialog = AlertDialogPrimitive.Root
 
@@ -96,13 +99,20 @@ const AlertDialogDescription = React.forwardRef<
 AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName
 
+// Custom type for the AlertDialogAction component that includes variant
+interface AlertDialogActionProps 
+  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>,
+    VariantProps<typeof buttonVariants> {
+  variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link";
+}
+
 const AlertDialogAction = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Action>,
-  React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action>
->(({ className, ...props }, ref) => (
+  AlertDialogActionProps
+>(({ className, variant = "default", ...props }, ref) => (
   <AlertDialogPrimitive.Action
     ref={ref}
-    className={cn(buttonVariants(), className)}
+    className={cn(buttonVariants({ variant }), className)}
     {...props}
   />
 ))

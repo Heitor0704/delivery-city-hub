@@ -72,6 +72,11 @@ export default function OwnerMenu() {
     }
   };
 
+  const handleEdit = (id: string, type: string) => {
+    console.log(`Edit ${type} with ID: ${id}`);
+    // Implement edit functionality here
+  };
+
   const handleDelete = (id: string, type: string) => {
     setItemToDelete({id, type});
     setDeleteDialogOpen(true);
@@ -165,19 +170,19 @@ export default function OwnerMenu() {
         </TabsList>
 
         <TabsContent value="categories">
-          <CategoryList onEdit={(id) => console.log('Edit category', id)} onDelete={(id) => handleDelete(id, 'category')} />
+          <CategoryList onEdit={(id) => handleEdit(id, 'category')} onDelete={(id) => handleDelete(id, 'category')} />
         </TabsContent>
         
         <TabsContent value="addons">
-          <AddonList onEdit={(id) => console.log('Edit addon', id)} onDelete={(id) => handleDelete(id, 'addon')} />
+          <AddonList onEdit={(id) => handleEdit(id, 'addon')} onDelete={(id) => handleDelete(id, 'addon')} />
         </TabsContent>
         
         <TabsContent value="levels">
-          <MenuLevelList onEdit={(id) => console.log('Edit level', id)} onDelete={(id) => handleDelete(id, 'level')} />
+          <MenuLevelList onEdit={(id) => handleEdit(id, 'level')} onDelete={(id) => handleDelete(id, 'level')} />
         </TabsContent>
         
         <TabsContent value="options">
-          <MenuOptionList onEdit={(id) => console.log('Edit option', id)} onDelete={(id) => handleDelete(id, 'option')} />
+          <MenuOptionList onEdit={(id) => handleEdit(id, 'option')} onDelete={(id) => handleDelete(id, 'option')} />
         </TabsContent>
       </Tabs>
 
@@ -362,7 +367,7 @@ export default function OwnerMenu() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={confirmDelete}>
+            <AlertDialogAction onClick={confirmDelete} variant="destructive">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
