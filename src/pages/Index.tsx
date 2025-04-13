@@ -8,29 +8,37 @@ const Index = () => {
   const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
+    console.log("Index page - Auth state:", { isAuthenticated, user });
+    
     if (isAuthenticated && user) {
-      // Se estiver autenticado, redireciona para o dashboard apropriado
-      // Usando o tipo_usuario da tabela Usuarios
+      console.log("Redirecting authenticated user with role:", user.role);
+      
+      // Usando o role mapeado do tipo_usuario da tabela Usuarios
       switch (user.role) {
         case "owner":
+          console.log("Redirecting to owner dashboard");
           navigate('/owner-dashboard', { replace: true });
           break;
         case "cityManager":
+          console.log("Redirecting to city manager dashboard");
           navigate('/city-manager-dashboard', { replace: true });
           break;
         case "admin":
+          console.log("Redirecting to admin dashboard");
           navigate('/admin-dashboard', { replace: true });
           break;
         default:
+          console.log("Unknown role, redirecting to root");
           navigate('/', { replace: true });
       }
-    } else {
-      // Se não estiver autenticado, redireciona para a página de login
-      navigate('/', { replace: true });
+    } else if (!isAuthenticated) {
+      console.log("User not authenticated, staying on login page");
+      // Deixamos na página atual (login) se o usuário não estiver autenticado
     }
   }, [isAuthenticated, user, navigate]);
 
-  return null; // Esta página apenas redireciona
+  // Esta página apenas redireciona
+  return null;
 };
 
 export default Index;

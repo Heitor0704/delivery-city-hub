@@ -46,11 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.id);
         setSession(currentSession);
         
         if (currentSession?.user) {
-          fetchUserData(currentSession.user);
+          await fetchUserData(currentSession.user);
         } else {
           setUser(null);
         }
@@ -58,11 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+    supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
+      console.log("Got session:", currentSession?.user?.id);
       setSession(currentSession);
       
       if (currentSession?.user) {
-        fetchUserData(currentSession.user);
+        await fetchUserData(currentSession.user);
       }
     });
 
@@ -74,11 +76,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Fetch additional user data from Usuarios table
   const fetchUserData = async (authUser: User) => {
     try {
+      console.log("Fetching user data for email:", authUser.email);
+      
       const { data, error } = await supabase
         .from('Usuarios')
         .select('*')
         .eq('email', authUser.email)
         .single();
+
+      console.log("User data query result:", data, error);
 
       if (error) {
         console.error("Error fetching user data:", error);
@@ -88,6 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data) {
         const userData = data as UserData;
+        console.log("Usuarios data:", userData);
+        console.log("tipo_usuario:", userData.tipo_usuario);
         
         // Map tipo_usuario directly to UserRole
         let role: UserRole;
@@ -101,14 +109,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role = "owner"; // default or owner type
         }
 
+        console.log("Mapped role:", role);
+
         // Set user state with combined data
-        setUser({
+        const authUserData = {
           id: userData.user_id,
           email: userData.email || authUser.email || "",
           name: userData.nome_usuario || "",
           role,
           // No avatar in Usuarios table, so not setting it
-        });
+        };
+        
+        console.log("Setting user state:", authUserData);
+        setUser(authUserData);
+      } else {
+        console.error("No user data found for email:", authUser.email);
+        toast.error("Usuário não encontrado");
       }
     } catch (error) {
       console.error("Error in fetchUserData:", error);
@@ -124,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (error) throw new Error(error.message);
       
+      console.log("Login successful:", data);
       // The user data will be fetched by the onAuthStateChange listener
     } catch (error) {
       console.error("Login error:", error);
