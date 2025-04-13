@@ -1,29 +1,23 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
-type UserRole = "owner" | "cityManager" | "admin";
-
 // Demo user credentials for testing
 const DEMO_USERS = {
-  owner: { email: "dono@fomex.com", password: "Fomex2025!", role: "owner" },
-  cityManager: { email: "gerente@fomex.com", password: "Fomex2025!", role: "cityManager" },
-  admin: { email: "admin@fomex.com", password: "Fomex2025!", role: "admin" },
+  owner: { email: "dono@fomex.com", password: "Fomex2025!" },
+  cityManager: { email: "gerente@fomex.com", password: "Fomex2025!" },
+  admin: { email: "admin@fomex.com", password: "Fomex2025!" },
 };
 
 export default function AuthForm() {
-  const navigate = useNavigate();
   const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("owner");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,9 +32,6 @@ export default function AuthForm() {
       // Fazer login
       await login(email, password);
       
-      // Redirecionar após login bem-sucedido
-      toast.success("Login realizado com sucesso!");
-      
       // O redirecionamento acontecerá automaticamente no componente Index.tsx
     } catch (error) {
       console.error("Login error:", error);
@@ -52,7 +43,6 @@ export default function AuthForm() {
     const demoUser = DEMO_USERS[userType];
     setEmail(demoUser.email);
     setPassword(demoUser.password);
-    setRole(demoUser.role as UserRole);
     toast.info(`Credenciais de ${userType} preenchidas. Clique em "Entrar" para fazer login.`);
   };
 
@@ -93,19 +83,6 @@ export default function AuthForm() {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-gray-700 font-medium">Tipo de Usuário</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger className="border-gray-300 focus:border-orange-500">
-                <SelectValue placeholder="Selecione o tipo de usuário" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="owner">Dono do Estabelecimento</SelectItem>
-                <SelectItem value="cityManager">Gerente da Cidade</SelectItem>
-                <SelectItem value="admin">Dono do Sistema</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <Button 
             type="submit" 
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-md transition"
@@ -121,9 +98,6 @@ export default function AuthForm() {
             >
               Esqueci minha senha
             </button>
-          </div>
-          <div className="flex justify-center mt-2 text-sm text-gray-600">
-            Não tem login? <a href="#" className="text-orange-600 hover:text-orange-800 ml-1">Cadastre-se</a>
           </div>
 
           {/* Demo logins */}

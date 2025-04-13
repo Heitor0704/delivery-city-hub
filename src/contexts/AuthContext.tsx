@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }, 0);
         } else {
           setUser(null);
+          setIsLoading(false);
         }
       }
     );
@@ -81,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error("Error fetching user profile:", error);
-        throw error;
+        setIsLoading(false);
+        return;
       }
       
       if (data) {
@@ -120,13 +122,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       
       if (error) {
+        console.error("Login error:", error);
+        toast.error("Erro ao fazer login: " + (error.message === "Invalid login credentials" ? "Email ou senha inválidos" : error.message));
         throw error;
       }
       
+      toast.success("Login bem-sucedido!");
       // We don't need to manually set the user here as the onAuthStateChange event will handle it
     } catch (error: any) {
       console.error("Login error:", error);
-      toast.error("Erro ao fazer login: " + error.message);
       throw error;
     } finally {
       setIsLoading(false);
