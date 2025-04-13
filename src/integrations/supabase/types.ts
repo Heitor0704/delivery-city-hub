@@ -117,6 +117,179 @@ export type Database = {
         }
         Relationships: []
       }
+      Configuracao_Sistema: {
+        Row: {
+          categoria: string | null
+          created_at: string | null
+          criado_por: string | null
+          descricao: string | null
+          id: number
+          nome_config: string
+          updated_at: string | null
+          valor: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string | null
+          criado_por?: string | null
+          descricao?: string | null
+          id?: number
+          nome_config: string
+          updated_at?: string | null
+          valor?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string | null
+          criado_por?: string | null
+          descricao?: string | null
+          id?: number
+          nome_config?: string
+          updated_at?: string | null
+          valor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Configuracao_Sistema_criado_por_fkey"
+            columns: ["criado_por"]
+            isOneToOne: false
+            referencedRelation: "Usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      Cupom: {
+        Row: {
+          ativo: boolean | null
+          cidade_id: number | null
+          codigo: string
+          created_at: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
+          estabelecimento_id: number | null
+          id: number
+          limite_usos: number | null
+          max_desconto: number | null
+          min_valor_pedido: number | null
+          percentual: number | null
+          tipo: string
+          usos_restantes: number | null
+          valor: number | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          cidade_id?: number | null
+          codigo: string
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          estabelecimento_id?: number | null
+          id?: number
+          limite_usos?: number | null
+          max_desconto?: number | null
+          min_valor_pedido?: number | null
+          percentual?: number | null
+          tipo: string
+          usos_restantes?: number | null
+          valor?: number | null
+        }
+        Update: {
+          ativo?: boolean | null
+          cidade_id?: number | null
+          codigo?: string
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          estabelecimento_id?: number | null
+          id?: number
+          limite_usos?: number | null
+          max_desconto?: number | null
+          min_valor_pedido?: number | null
+          percentual?: number | null
+          tipo?: string
+          usos_restantes?: number | null
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Cupom_cidade_id_fkey"
+            columns: ["cidade_id"]
+            isOneToOne: false
+            referencedRelation: "Cidade"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Cupom_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: false
+            referencedRelation: "Estabelecimento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Cupom_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: false
+            referencedRelation: "view_estabelecimento"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      Dados_Bancarios: {
+        Row: {
+          agencia: string | null
+          banco: string | null
+          chave_pix: string | null
+          conta: string | null
+          created_at: string | null
+          documento_titular: string | null
+          id: number
+          tipo_conta: string | null
+          tipo_pix: string | null
+          titular: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          agencia?: string | null
+          banco?: string | null
+          chave_pix?: string | null
+          conta?: string | null
+          created_at?: string | null
+          documento_titular?: string | null
+          id?: number
+          tipo_conta?: string | null
+          tipo_pix?: string | null
+          titular?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          agencia?: string | null
+          banco?: string | null
+          chave_pix?: string | null
+          conta?: string | null
+          created_at?: string | null
+          documento_titular?: string | null
+          id?: number
+          tipo_conta?: string | null
+          tipo_pix?: string | null
+          titular?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Dados_Bancarios_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "Usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       Documento: {
         Row: {
           created_at: string
@@ -220,8 +393,11 @@ export type Database = {
         Row: {
           avaliacoes: number | null
           cidade_id: number | null
+          cnpj: string | null
           created_at: string
           descrição: string | null
+          destaque: boolean | null
+          email: string | null
           endereco: Json | null
           forma_cobranca_entrega: string | null
           horarios: Json | null
@@ -231,6 +407,9 @@ export type Database = {
           percentual_cobranca: number | null
           seguimentos: number[] | null
           status: string | null
+          taxa_cancelamento: number | null
+          taxa_entrega: number | null
+          taxa_servico: number | null
           telefone: string | null
           tempo_max: number
           tempo_min: number
@@ -241,8 +420,11 @@ export type Database = {
         Insert: {
           avaliacoes?: number | null
           cidade_id?: number | null
+          cnpj?: string | null
           created_at?: string
           descrição?: string | null
+          destaque?: boolean | null
+          email?: string | null
           endereco?: Json | null
           forma_cobranca_entrega?: string | null
           horarios?: Json | null
@@ -252,6 +434,9 @@ export type Database = {
           percentual_cobranca?: number | null
           seguimentos?: number[] | null
           status?: string | null
+          taxa_cancelamento?: number | null
+          taxa_entrega?: number | null
+          taxa_servico?: number | null
           telefone?: string | null
           tempo_max?: number
           tempo_min?: number
@@ -262,8 +447,11 @@ export type Database = {
         Update: {
           avaliacoes?: number | null
           cidade_id?: number | null
+          cnpj?: string | null
           created_at?: string
           descrição?: string | null
+          destaque?: boolean | null
+          email?: string | null
           endereco?: Json | null
           forma_cobranca_entrega?: string | null
           horarios?: Json | null
@@ -273,6 +461,9 @@ export type Database = {
           percentual_cobranca?: number | null
           seguimentos?: number[] | null
           status?: string | null
+          taxa_cancelamento?: number | null
+          taxa_entrega?: number | null
+          taxa_servico?: number | null
           telefone?: string | null
           tempo_max?: number
           tempo_min?: number
@@ -281,6 +472,66 @@ export type Database = {
           valor_entrega?: number
         }
         Relationships: []
+      }
+      Integracao_Pagamento: {
+        Row: {
+          cartao_enabled: boolean | null
+          created_at: string | null
+          dinheiro_enabled: boolean | null
+          estabelecimento_id: number | null
+          id: number
+          mercadopago_access_token: string | null
+          mercadopago_client_id: string | null
+          mercadopago_client_secret: string | null
+          mercadopago_public_key: string | null
+          mercadopago_sandbox: boolean | null
+          pix_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          cartao_enabled?: boolean | null
+          created_at?: string | null
+          dinheiro_enabled?: boolean | null
+          estabelecimento_id?: number | null
+          id?: number
+          mercadopago_access_token?: string | null
+          mercadopago_client_id?: string | null
+          mercadopago_client_secret?: string | null
+          mercadopago_public_key?: string | null
+          mercadopago_sandbox?: boolean | null
+          pix_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          cartao_enabled?: boolean | null
+          created_at?: string | null
+          dinheiro_enabled?: boolean | null
+          estabelecimento_id?: number | null
+          id?: number
+          mercadopago_access_token?: string | null
+          mercadopago_client_id?: string | null
+          mercadopago_client_secret?: string | null
+          mercadopago_public_key?: string | null
+          mercadopago_sandbox?: boolean | null
+          pix_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Integracao_Pagamento_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: false
+            referencedRelation: "Estabelecimento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Integracao_Pagamento_estabelecimento_id_fkey"
+            columns: ["estabelecimento_id"]
+            isOneToOne: false
+            referencedRelation: "view_estabelecimento"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       "Item Carrinho": {
         Row: {
@@ -322,6 +573,7 @@ export type Database = {
           id: number
           online: boolean | null
           stattus_cnh: string
+          status: string | null
           status_crv: string
           status_rg: string
           total_faturado: number | null
@@ -337,6 +589,7 @@ export type Database = {
           id?: number
           online?: boolean | null
           stattus_cnh?: string
+          status?: string | null
           status_crv?: string
           status_rg?: string
           total_faturado?: number | null
@@ -352,6 +605,7 @@ export type Database = {
           id?: number
           online?: boolean | null
           stattus_cnh?: string
+          status?: string | null
           status_crv?: string
           status_rg?: string
           total_faturado?: number | null
@@ -401,6 +655,47 @@ export type Database = {
           qtd_opcoes_min?: number | null
         }
         Relationships: []
+      }
+      Notificacao: {
+        Row: {
+          created_at: string | null
+          dados_adicionais: Json | null
+          id: number
+          lida: boolean | null
+          mensagem: string
+          tipo: string | null
+          titulo: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          dados_adicionais?: Json | null
+          id?: number
+          lida?: boolean | null
+          mensagem: string
+          tipo?: string | null
+          titulo: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          dados_adicionais?: Json | null
+          id?: number
+          lida?: boolean | null
+          mensagem?: string
+          tipo?: string | null
+          titulo?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Notificacao_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "Usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       "Opcao Cardapio": {
         Row: {
@@ -497,6 +792,7 @@ export type Database = {
           categoria_id: number | null
           created_at: string
           descricao: string | null
+          destaque: boolean | null
           estabelecimento_id: number
           estoque: number | null
           foto: string | null
@@ -512,6 +808,7 @@ export type Database = {
           categoria_id?: number | null
           created_at?: string
           descricao?: string | null
+          destaque?: boolean | null
           estabelecimento_id?: number
           estoque?: number | null
           foto?: string | null
@@ -527,6 +824,7 @@ export type Database = {
           categoria_id?: number | null
           created_at?: string
           descricao?: string | null
+          destaque?: boolean | null
           estabelecimento_id?: number
           estoque?: number | null
           foto?: string | null
@@ -539,6 +837,41 @@ export type Database = {
           status?: string | null
         }
         Relationships: []
+      }
+      Saldo: {
+        Row: {
+          id: number
+          saldo_atual: number | null
+          saldo_bloqueado: number | null
+          tipo_conta: string
+          ultima_atualizacao: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: number
+          saldo_atual?: number | null
+          saldo_bloqueado?: number | null
+          tipo_conta: string
+          ultima_atualizacao?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: number
+          saldo_atual?: number | null
+          saldo_bloqueado?: number | null
+          tipo_conta?: string
+          ultima_atualizacao?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Saldo_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "Usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       Seguimento: {
         Row: {
@@ -566,6 +899,60 @@ export type Database = {
           seguimento?: string | null
         }
         Relationships: []
+      }
+      Transacao_Financeira: {
+        Row: {
+          created_at: string | null
+          criado_por: string | null
+          id: number
+          observacao: string | null
+          pedido_id: number | null
+          status: string
+          tipo_conta: string
+          tipo_operacao: string
+          user_id: string | null
+          valor: number
+        }
+        Insert: {
+          created_at?: string | null
+          criado_por?: string | null
+          id?: number
+          observacao?: string | null
+          pedido_id?: number | null
+          status: string
+          tipo_conta: string
+          tipo_operacao: string
+          user_id?: string | null
+          valor: number
+        }
+        Update: {
+          created_at?: string | null
+          criado_por?: string | null
+          id?: number
+          observacao?: string | null
+          pedido_id?: number | null
+          status?: string
+          tipo_conta?: string
+          tipo_operacao?: string
+          user_id?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "Transacao_Financeira_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "Pedido"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "Transacao_Financeira_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "Usuarios"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       Usuarios: {
         Row: {
@@ -715,10 +1102,7 @@ export type Database = {
       }
     }
     Functions: {
-      delete_all_auth_users: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

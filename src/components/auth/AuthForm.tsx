@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 type UserRole = "owner" | "cityManager" | "admin";
 
@@ -24,6 +26,8 @@ export default function AuthForm() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("owner");
   const [isLoading, setIsLoading] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [name, setName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,30 +41,78 @@ export default function AuthForm() {
         return;
       }
 
-      // Fazer login
-      await login(email, password);
-      
-      // Redirecionar após login bem-sucedido
-      toast.success("Login realizado com sucesso!");
-      
-      // Redireciona para o dashboard específico do tipo de usuário
-      switch (role) {
-        case "owner":
-          navigate("/owner-dashboard");
-          break;
-        case "cityManager":
-          navigate("/city-manager-dashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        default:
-          navigate("/");
+      if (isRegistering && !name) {
+        toast.error("Por favor, informe seu nome.");
+        setIsLoading(false);
+        return;
+      }
+
+      if (isRegistering) {
+        // Register new user
+        await handleRegister();
+      } else {
+        // Login existing user
+        await login(email, password);
+        
+        // Redirect based on role
+        toast.success("Login realizado com sucesso!");
+        navigateByRole(role);
       }
     } catch (error) {
-      toast.error("Erro ao fazer login: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
+      toast.error("Erro: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    try {
+      // Create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+
+      if (authError) throw new Error(authError.message);
+      
+      if (!authData.user) throw new Error("Erro ao criar conta");
+
+      // Create entry in Usuarios table
+      const { error: userError } = await supabase
+        .from('Usuarios')
+        .insert([
+          { 
+            user_id: authData.user.id,
+            nome_usuario: name,
+            email: email,
+            tipo_usuario: role,
+            senha: '', // Don't store actual password
+          }
+        ]);
+
+      if (userError) throw new Error(userError.message);
+
+      toast.success("Conta criada com sucesso!");
+      navigateByRole(role);
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
+  };
+
+  const navigateByRole = (userRole: UserRole) => {
+    switch (userRole) {
+      case "owner":
+        navigate("/owner-dashboard");
+        break;
+      case "cityManager":
+        navigate("/city-manager-dashboard");
+        break;
+      case "admin":
+        navigate("/admin-dashboard");
+        break;
+      default:
+        navigate("/");
     }
   };
 
@@ -70,6 +122,10 @@ export default function AuthForm() {
     setPassword(demoUser.password);
     setRole(demoUser.role as UserRole);
     toast.info(`Credenciais de ${userType} preenchidas. Clique em "Entrar" para fazer login.`);
+  };
+
+  const toggleMode = () => {
+    setIsRegistering(!isRegistering);
   };
 
   return (
@@ -85,6 +141,25 @@ export default function AuthForm() {
           </div>
         </div>
         <form onSubmit={handleSubmit} className="space-y-5 p-6">
+          <h2 className="text-xl font-bold text-center text-gray-800">
+            {isRegistering ? "Criar Conta" : "Entrar"}
+          </h2>
+          
+          {isRegistering && (
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-gray-700 font-medium">Nome</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Digite seu nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="border-gray-300 focus:border-orange-500 focus:ring focus:ring-orange-200"
+                required={isRegistering}
+              />
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label htmlFor="email" className="text-gray-700 font-medium">Email</Label>
             <Input
@@ -127,48 +202,61 @@ export default function AuthForm() {
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-md transition"
             disabled={isLoading}
           >
-            {isLoading ? "Entrando..." : "ENTRAR"}
+            {isLoading ? "Processando..." : isRegistering ? "CADASTRAR" : "ENTRAR"}
           </Button>
-          <div className="flex justify-center mt-4">
-            <button 
-              type="button" 
-              className="text-orange-600 hover:text-orange-800 text-sm"
-              onClick={() => toast.info("Função de recuperar senha em desenvolvimento")}
-            >
-              Esqueci minha senha
-            </button>
-          </div>
-          <div className="flex justify-center mt-2 text-sm text-gray-600">
-            Não tem login? <a href="#" className="text-orange-600 hover:text-orange-800 ml-1">Cadastre-se</a>
-          </div>
-
-          {/* Demo logins */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-2">Demonstração:</p>
-            <div className="flex justify-between space-x-2">
-              <button
-                type="button"
-                onClick={() => fillDemoCredentials("owner")}
-                className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
+          
+          {!isRegistering && (
+            <div className="flex justify-center mt-4">
+              <button 
+                type="button" 
+                className="text-orange-600 hover:text-orange-800 text-sm"
+                onClick={() => toast.info("Função de recuperar senha em desenvolvimento")}
               >
-                Demo Dono
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoCredentials("cityManager")}
-                className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
-              >
-                Demo Gerente
-              </button>
-              <button
-                type="button"
-                onClick={() => fillDemoCredentials("admin")}
-                className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
-              >
-                Demo Admin
+                Esqueci minha senha
               </button>
             </div>
+          )}
+          
+          <div className="flex justify-center mt-2 text-sm text-gray-600">
+            {isRegistering ? "Já tem uma conta?" : "Não tem login?"} 
+            <button 
+              type="button"
+              className="text-orange-600 hover:text-orange-800 ml-1"
+              onClick={toggleMode}
+            >
+              {isRegistering ? "Entre aqui" : "Cadastre-se"}
+            </button>
           </div>
+
+          {/* Demo logins - only show in login mode */}
+          {!isRegistering && (
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500 text-center mb-2">Demonstração:</p>
+              <div className="flex justify-between space-x-2">
+                <button
+                  type="button"
+                  onClick={() => fillDemoCredentials("owner")}
+                  className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
+                >
+                  Demo Dono
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemoCredentials("cityManager")}
+                  className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
+                >
+                  Demo Gerente
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemoCredentials("admin")}
+                  className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
+                >
+                  Demo Admin
+                </button>
+              </div>
+            </div>
+          )}
         </form>
       </CardContent>
     </Card>
