@@ -29,6 +29,7 @@ import CityManagerRegistrations from "@/pages/city-manager/Registrations";
 import CityManagerCommissions from "@/pages/city-manager/Commissions";
 import CityManagerReports from "@/pages/city-manager/Reports";
 import CityManagerSettings from "@/pages/city-manager/Settings";
+import CityManagerOrders from "@/pages/city-manager/Orders";
 
 // Admin pages
 import AdminCities from "@/pages/admin/Cities";
@@ -112,6 +113,7 @@ const App = () => (
               <Route path="/city-manager/commissions" element={<CityManagerCommissions />} />
               <Route path="/city-manager/reports" element={<CityManagerReports />} />
               <Route path="/city-manager/settings" element={<CityManagerSettings />} />
+              <Route path="/city-manager/orders" element={<CityManagerOrders />} />
 
               {/* Rotas do administrador */}
               <Route path="/admin-dashboard" element={<AdminDashboard />} />

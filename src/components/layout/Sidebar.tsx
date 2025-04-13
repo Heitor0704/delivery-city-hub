@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, PackageSearch, ClipboardList, Store, Users, Package, 
   CreditCard, BarChart3, Settings, Building, Map, UserCog, LogOut, 
-  ChevronLeft, ChevronRight 
+  ChevronLeft, ChevronRight, ShoppingBag
 } from "lucide-react";
 import { FomeXLogo } from "@/components/ui/logo";
 
@@ -72,6 +72,7 @@ export function Sidebar({ className }: SidebarProps) {
 
   const cityManagerLinks = [
     { href: "/city-manager-dashboard", icon: LayoutDashboard, title: "Dashboard" },
+    { href: "/city-manager/orders", icon: ShoppingBag, title: "Pedidos" },
     { href: "/city-manager/stores", icon: Store, title: "Estabelecimentos" },
     { href: "/city-manager/deliverers", icon: Users, title: "Entregadores" },
     { href: "/city-manager/registrations", icon: ClipboardList, title: "Cadastros" },
