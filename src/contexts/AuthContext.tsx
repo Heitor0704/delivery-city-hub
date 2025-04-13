@@ -1,8 +1,6 @@
-
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
-// Rename the imported User to SupabaseUser to avoid conflicts
 import { User as SupabaseUser } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
@@ -16,7 +14,7 @@ interface UserData {
   telefone: string | null;
   tipo_usuario: string | null;
   user_id: string;
-  avatar: string | null; // Adicionado o campo avatar que faltava
+  avatar: string | null; // Added the avatar field here
 }
 
 type UserRole = "admin" | "cityManager" | "owner";
