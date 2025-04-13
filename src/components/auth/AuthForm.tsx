@@ -1,28 +1,19 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-
-type UserRole = "owner" | "cityManager" | "admin";
-
-// Demo user credentials for testing
-const DEMO_USERS = {
-  owner: { email: "dono@fomex.com", password: "123456", role: "owner" },
-  cityManager: { email: "gerente@fomex.com", password: "123456", role: "cityManager" },
-  admin: { email: "admin@fomex.com", password: "123456", role: "admin" },
-};
+import { Loader2 } from "lucide-react";
 
 export default function AuthForm() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("owner");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +24,6 @@ export default function AuthForm() {
       // Validar campos
       if (!email || !password) {
         toast.error("Por favor, preencha todos os campos.");
-        setIsLoading(false);
         return;
       }
 
@@ -42,21 +32,7 @@ export default function AuthForm() {
       
       // Redirecionar após login bem-sucedido
       toast.success("Login realizado com sucesso!");
-      
-      // Redireciona para o dashboard específico do tipo de usuário
-      switch (role) {
-        case "owner":
-          navigate("/owner-dashboard");
-          break;
-        case "cityManager":
-          navigate("/city-manager-dashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        default:
-          navigate("/");
-      }
+      navigate("/dashboard");
     } catch (error) {
       toast.error("Erro ao fazer login: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
     } finally {
@@ -64,11 +40,21 @@ export default function AuthForm() {
     }
   };
 
-  const fillDemoCredentials = (userType: keyof typeof DEMO_USERS) => {
-    const demoUser = DEMO_USERS[userType];
-    setEmail(demoUser.email);
-    setPassword(demoUser.password);
-    setRole(demoUser.role as UserRole);
+  const fillDemoCredentials = (userType: string) => {
+    switch (userType) {
+      case "owner":
+        setEmail("dono@fomex.com");
+        setPassword("123456");
+        break;
+      case "cityManager":
+        setEmail("gerente@fomex.com");
+        setPassword("123456");
+        break;
+      case "admin":
+        setEmail("admin@fomex.com");
+        setPassword("123456");
+        break;
+    }
     toast.info(`Credenciais de ${userType} preenchidas. Clique em "Entrar" para fazer login.`);
   };
 
@@ -109,26 +95,22 @@ export default function AuthForm() {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-gray-700 font-medium">Tipo de Usuário</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger className="border-gray-300 focus:border-orange-500">
-                <SelectValue placeholder="Selecione o tipo de usuário" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="owner">Dono do Estabelecimento</SelectItem>
-                <SelectItem value="cityManager">Gerente da Cidade</SelectItem>
-                <SelectItem value="admin">Dono do Sistema</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          
           <Button 
             type="submit" 
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-md transition"
             disabled={isLoading}
           >
-            {isLoading ? "Entrando..." : "ENTRAR"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : (
+              "ENTRAR"
+            )}
           </Button>
+          
           <div className="flex justify-center mt-4">
             <button 
               type="button" 
@@ -137,9 +119,6 @@ export default function AuthForm() {
             >
               Esqueci minha senha
             </button>
-          </div>
-          <div className="flex justify-center mt-2 text-sm text-gray-600">
-            Não tem login? <a href="#" className="text-orange-600 hover:text-orange-800 ml-1">Cadastre-se</a>
           </div>
 
           {/* Demo logins */}
