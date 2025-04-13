@@ -89,12 +89,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data) {
         const userData = data as UserData;
         
-        // Map tipo_usuario to UserRole
-        let role: UserRole = "owner"; // default
-        if (userData.tipo_usuario?.includes("admin")) {
+        // Map tipo_usuario directly to UserRole
+        let role: UserRole;
+        
+        // Map the tipo_usuario value to our application roles
+        if (userData.tipo_usuario === "admin") {
           role = "admin";
-        } else if (userData.tipo_usuario?.includes("gerente") || userData.tipo_usuario?.includes("manager")) {
+        } else if (userData.tipo_usuario === "cityManager" || userData.tipo_usuario === "gerente") {
           role = "cityManager";
+        } else {
+          role = "owner"; // default or owner type
         }
 
         // Set user state with combined data

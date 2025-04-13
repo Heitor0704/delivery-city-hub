@@ -10,6 +10,7 @@ const Index = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       // Se estiver autenticado, redireciona para o dashboard apropriado
+      // Usando o tipo_usuario da tabela Usuarios
       switch (user.role) {
         case "owner":
           navigate('/owner-dashboard', { replace: true });
