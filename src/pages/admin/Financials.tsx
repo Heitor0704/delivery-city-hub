@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -50,7 +49,8 @@ import {
   DownloadCloud,
   DollarSign,
   CreditCard,
-  Wallet
+  Wallet,
+  Percent
 } from "lucide-react";
 import { 
   addDays, 
