@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,39 +30,36 @@ export default function AuthForm() {
     setIsLoading(true);
 
     try {
-      // Simulação de autenticação para fins de demonstração
-      setTimeout(() => {
-        if (email && password) {
-          // Simula login bem-sucedido - fixing the function call with 2 parameters
-          login(email, password)
-            .then(() => {
-              // Redireciona para o dashboard específico do tipo de usuário
-              switch (role) {
-                case "owner":
-                  navigate("/owner-dashboard");
-                  break;
-                case "cityManager":
-                  navigate("/city-manager-dashboard");
-                  break;
-                case "admin":
-                  navigate("/admin-dashboard");
-                  break;
-                default:
-                  navigate("/");
-              }
-              
-              toast.success("Login realizado com sucesso!");
-            })
-            .catch((error) => {
-              toast.error("Erro ao fazer login: " + error.message);
-            });
-        } else {
-          toast.error("Por favor, preencha todos os campos.");
-        }
+      // Validar campos
+      if (!email || !password) {
+        toast.error("Por favor, preencha todos os campos.");
         setIsLoading(false);
-      }, 1000);
+        return;
+      }
+
+      // Fazer login
+      await login(email, password);
+      
+      // Redirecionar após login bem-sucedido
+      toast.success("Login realizado com sucesso!");
+      
+      // Redireciona para o dashboard específico do tipo de usuário
+      switch (role) {
+        case "owner":
+          navigate("/owner-dashboard");
+          break;
+        case "cityManager":
+          navigate("/city-manager-dashboard");
+          break;
+        case "admin":
+          navigate("/admin-dashboard");
+          break;
+        default:
+          navigate("/");
+      }
     } catch (error) {
-      toast.error("Erro ao fazer login. Tente novamente.");
+      toast.error("Erro ao fazer login: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
+    } finally {
       setIsLoading(false);
     }
   };

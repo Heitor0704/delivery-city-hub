@@ -31,15 +31,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAuthenticated = !!user;
 
   const login = async (email: string, password: string) => {
-    // Mock login logic - in a real app, you would verify credentials with an API
-    if (password !== "password") {
+    // Para fins de demonstração, aceitaremos "123456" como senha para todos os usuários
+    // Em produção, isso seria validado no backend
+    if (password !== "123456") {
       throw new Error("Credenciais inválidas");
     }
 
     let role: UserRole = "owner";
     if (email.includes("admin")) {
       role = "admin";
-    } else if (email.includes("manager")) {
+    } else if (email.includes("gerente") || email.includes("manager")) {
       role = "cityManager";
     }
 

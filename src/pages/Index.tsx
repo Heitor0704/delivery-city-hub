@@ -12,20 +12,20 @@ const Index = () => {
       // Se estiver autenticado, redireciona para o dashboard apropriado
       switch (user.role) {
         case "owner":
-          navigate('/owner-dashboard');
+          navigate('/owner-dashboard', { replace: true });
           break;
         case "cityManager":
-          navigate('/city-manager-dashboard');
+          navigate('/city-manager-dashboard', { replace: true });
           break;
         case "admin":
-          navigate('/admin-dashboard');
+          navigate('/admin-dashboard', { replace: true });
           break;
         default:
-          navigate('/');
+          navigate('/', { replace: true });
       }
     } else {
       // Se não estiver autenticado, redireciona para a página de login
-      navigate('/');
+      navigate('/', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 
