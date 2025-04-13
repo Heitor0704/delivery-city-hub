@@ -21,7 +21,7 @@ interface UserData {
   telefone: string;
   tipo_usuario: string;
   user_id: string;
-  avatar?: string; // Adicionamos a propriedade avatar que estava faltando
+  avatar?: string; // Adicionando a propriedade avatar
 }
 
 interface AuthContextType {
