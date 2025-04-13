@@ -14,7 +14,9 @@ import {
   Percent, 
   Save,
   Settings,
-  Euro
+  Euro,
+  CreditCard,
+  Banknote 
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,6 +33,17 @@ export default function AdminSettings() {
   const [mercadoPagoEnabled, setMercadoPagoEnabled] = useState(true);
   const [pixEnabled, setPixEnabled] = useState(true);
   const [cashEnabled, setCashEnabled] = useState(true);
+  
+  // Mercado Pago credentials
+  const [accessToken, setAccessToken] = useState("");
+  const [publicKey, setPublicKey] = useState("");
+  
+  // Bank account details
+  const [bankName, setBankName] = useState("");
+  const [accountType, setAccountType] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [agency, setAgency] = useState("");
+  const [pixKey, setPixKey] = useState("");
   
   const [isLoading, setIsLoading] = useState(false);
   
@@ -191,9 +204,113 @@ export default function AdminSettings() {
           
           {/* Payments Tab */}
           <TabsContent value="payments" className="space-y-4">
+            {/* Mercado Pago */}
             <Card>
               <CardHeader>
-                <CardTitle>Configurações de Pagamento</CardTitle>
+                <CardTitle>Configurações do Mercado Pago</CardTitle>
+                <CardDescription>
+                  Configure suas credenciais do Mercado Pago para processar pagamentos.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="accessToken">Access Token</Label>
+                  <Input 
+                    id="accessToken" 
+                    placeholder="Access Token do Mercado Pago" 
+                    value={accessToken} 
+                    onChange={(e) => setAccessToken(e.target.value)} 
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Token de acesso para a API do Mercado Pago.
+                  </p>
+                </div>
+                
+                <div className="space-y-1">
+                  <Label htmlFor="publicKey">Chave Pública</Label>
+                  <Input 
+                    id="publicKey" 
+                    placeholder="Chave Pública do Mercado Pago" 
+                    value={publicKey} 
+                    onChange={(e) => setPublicKey(e.target.value)} 
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Chave pública para integração com o frontend.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {/* Bank Account */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados Bancários</CardTitle>
+                <CardDescription>
+                  Configure seus dados bancários para receber os pagamentos.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="bankName">Banco</Label>
+                    <Input 
+                      id="bankName" 
+                      placeholder="Nome do banco" 
+                      value={bankName} 
+                      onChange={(e) => setBankName(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor="accountType">Tipo de Conta</Label>
+                    <Input 
+                      id="accountType" 
+                      placeholder="Corrente ou Poupança" 
+                      value={accountType} 
+                      onChange={(e) => setAccountType(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor="agency">Agência</Label>
+                    <Input 
+                      id="agency" 
+                      placeholder="Número da agência" 
+                      value={agency} 
+                      onChange={(e) => setAgency(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-1">
+                    <Label htmlFor="accountNumber">Conta</Label>
+                    <Input 
+                      id="accountNumber" 
+                      placeholder="Número da conta" 
+                      value={accountNumber} 
+                      onChange={(e) => setAccountNumber(e.target.value)} 
+                    />
+                  </div>
+                  
+                  <div className="space-y-1 md:col-span-2">
+                    <Label htmlFor="pixKey">Chave PIX</Label>
+                    <Input 
+                      id="pixKey" 
+                      placeholder="CPF, e-mail, telefone ou chave aleatória" 
+                      value={pixKey} 
+                      onChange={(e) => setPixKey(e.target.value)} 
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Sua chave PIX para recebimento de pagamentos imediatos.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Methods */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Métodos de Pagamento</CardTitle>
                 <CardDescription>
                   Ative ou desative os métodos de pagamento disponíveis no sistema.
                 </CardDescription>
@@ -202,7 +319,7 @@ export default function AdminSettings() {
                 <div className="grid gap-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <Euro className="h-5 w-5" />
+                      <CreditCard className="h-5 w-5" />
                       <div>
                         <Label htmlFor="mercadoPago">Mercado Pago</Label>
                         <p className="text-sm text-muted-foreground">
@@ -236,7 +353,7 @@ export default function AdminSettings() {
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      <DollarSign className="h-5 w-5" />
+                      <Banknote className="h-5 w-5" />
                       <div>
                         <Label htmlFor="cash">Dinheiro</Label>
                         <p className="text-sm text-muted-foreground">
