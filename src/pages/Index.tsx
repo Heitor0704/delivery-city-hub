@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -12,8 +13,9 @@ const Index = () => {
     
     if (isAuthenticated && user) {
       console.log("Redirecting authenticated user with role:", user.role);
+      toast.success(`Bem-vindo, ${user.name || "usuário"}!`);
       
-      // Usando o role mapeado do tipo_usuario da tabela Usuarios
+      // Using the role mapped from tipo_usuario in the Usuarios table
       switch (user.role) {
         case "owner":
           console.log("Redirecting to owner dashboard");
@@ -28,16 +30,17 @@ const Index = () => {
           navigate('/admin-dashboard', { replace: true });
           break;
         default:
-          console.log("Unknown role, redirecting to root");
+          console.log("Unknown role, redirecting to login page");
+          toast.error("Tipo de usuário não reconhecido");
           navigate('/', { replace: true });
       }
     } else if (!isAuthenticated) {
       console.log("User not authenticated, staying on login page");
-      // Deixamos na página atual (login) se o usuário não estiver autenticado
+      // User remains on current page (login) if not authenticated
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Esta página apenas redireciona
+  // This page only handles redirects
   return null;
 };
 
