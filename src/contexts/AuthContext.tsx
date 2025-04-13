@@ -16,7 +16,7 @@ interface UserData {
   telefone: string | null;
   tipo_usuario: string | null;
   user_id: string;
-  // Note: avatar is not defined in the Usuarios table
+  avatar: string | null;
 }
 
 type UserRole = "admin" | "cityManager" | "owner";
@@ -58,6 +58,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Auth state changed:", event);
         setSession(currentSession);
         
+        if (event === 'SIGNED_OUT') {
+          setUser(null);
+          localStorage.removeItem("user");
+          return;
+        }
+        
         if (currentSession?.user) {
           try {
             // Buscar dados do usuário do Supabase
@@ -66,6 +72,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               .select("*")
               .eq("user_id", currentSession.user.id)
               .single();
+
+            console.log("Dados do usuário:", userData);
 
             if (error) {
               console.error("Erro ao buscar dados do usuário:", error);
@@ -79,10 +87,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 email: currentSession.user.email || "",
                 name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
                 role: userData.tipo_usuario as UserRole,
-                // avatar is defined in our User interface but not in the database
-                // so we don't set it here
+                avatar: userData.avatar,
               };
               
+              console.log("Usuário autenticado:", userInfo);
               setUser(userInfo);
               localStorage.setItem("user", JSON.stringify(userInfo));
             }
@@ -121,10 +129,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: currentSession.user.email || "",
               name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
               role: userData.tipo_usuario as UserRole,
-              // avatar is defined in our User interface but not in the database
-              // so we don't set it here
+              avatar: userData.avatar,
             };
             
+            console.log("Usuário carregado da sessão:", userInfo);
             setUser(userInfo);
             localStorage.setItem("user", JSON.stringify(userInfo));
           }

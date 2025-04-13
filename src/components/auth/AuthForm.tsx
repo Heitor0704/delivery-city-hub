@@ -1,21 +1,22 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 type UserRole = "owner" | "cityManager" | "admin";
 
 // Demo user credentials for testing
 const DEMO_USERS = {
-  owner: { email: "dono@fomex.com", password: "123456", role: "owner" },
-  cityManager: { email: "gerente@fomex.com", password: "123456", role: "cityManager" },
-  admin: { email: "admin@fomex.com", password: "123456", role: "admin" },
+  owner: { email: "dono@fomex.com", password: "123456", role: "owner", name: "Dono Demo" },
+  cityManager: { email: "gerente@fomex.com", password: "123456", role: "cityManager", name: "Gerente Demo" },
+  admin: { email: "admin@fomex.com", password: "123456", role: "admin", name: "Admin Demo" },
 };
 
 export default function AuthForm() {
@@ -23,36 +24,59 @@ export default function AuthForm() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<UserRole>("owner");
   const [isLoading, setIsLoading] = useState(false);
+  const [isCreatingDemo, setIsCreatingDemo] = useState<string | null>(null);
 
-  // New function to create demo users via Supabase Auth
+  // Função para criar usuários demo via Supabase Auth
   const createDemoUser = async (userType: keyof typeof DEMO_USERS) => {
     const demoUser = DEMO_USERS[userType];
-    setIsLoading(true);
+    setIsCreatingDemo(userType);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // Tentar fazer login com as credenciais do usuário demo primeiro
+      // Se o login falhar, criamos um novo usuário
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
         email: demoUser.email,
         password: demoUser.password,
-        options: {
-          data: {
-            tipo_usuario: demoUser.role
-          }
-        }
       });
+      
+      if (loginError) {
+        console.log("Usuário demo não existe, criando novo usuário...");
+        
+        // Criar um novo usuário
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: demoUser.email,
+          password: demoUser.password,
+          options: {
+            data: {
+              nome_usuario: demoUser.name,
+              tipo_usuario: demoUser.role
+            }
+          }
+        });
 
-      if (error) {
-        toast.error(`Erro ao criar usuário demo: ${error.message}`);
-        console.error(error);
-      } else {
+        if (signUpError) {
+          toast.error(`Erro ao criar usuário demo: ${signUpError.message}`);
+          console.error("Erro ao criar usuário:", signUpError);
+          return;
+        }
+        
         toast.success(`Usuário demo ${userType} criado com sucesso!`);
+        
+        // Adicionar um pequeno atraso para garantir que o trigger tenha tempo de executar
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Fazer login com o usuário recém-criado
+        await login(demoUser.email, demoUser.password);
+      } else {
+        // Se o login foi bem-sucedido, o usuário já existe
+        toast.success(`Login com usuário demo ${userType} realizado com sucesso!`);
       }
     } catch (error) {
-      toast.error(`Erro inesperado: ${error}`);
-      console.error(error);
+      toast.error(`Erro inesperado: ${error instanceof Error ? error.message : String(error)}`);
+      console.error("Erro:", error);
     } finally {
-      setIsLoading(false);
+      setIsCreatingDemo(null);
     }
   };
 
@@ -64,7 +88,6 @@ export default function AuthForm() {
       // Validar campos
       if (!email || !password) {
         toast.error("Por favor, preencha todos os campos.");
-        setIsLoading(false);
         return;
       }
 
@@ -85,7 +108,6 @@ export default function AuthForm() {
     const demoUser = DEMO_USERS[userType];
     setEmail(demoUser.email);
     setPassword(demoUser.password);
-    setRole(demoUser.role as UserRole);
     toast.info(`Credenciais de ${userType} preenchidas. Clique em "Entrar" para fazer login.`);
   };
 
@@ -147,34 +169,77 @@ export default function AuthForm() {
             Não tem login? <a href="#" className="text-orange-600 hover:text-orange-800 ml-1">Cadastre-se</a>
           </div>
 
-          {/* Demo logins */}
+          {/* Demo logins section */}
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-2">Criar usuários demo:</p>
-            <div className="flex justify-between space-x-2">
-              <button
-                type="button"
-                onClick={() => createDemoUser("owner")}
-                disabled={isLoading}
-                className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
-              >
-                Criar Dono
-              </button>
-              <button
-                type="button"
-                onClick={() => createDemoUser("cityManager")}
-                disabled={isLoading}
-                className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
-              >
-                Criar Gerente
-              </button>
-              <button
-                type="button"
-                onClick={() => createDemoUser("admin")}
-                disabled={isLoading}
-                className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
-              >
-                Criar Admin
-              </button>
+            <p className="text-xs text-gray-500 text-center mb-2">Acesso Rápido Demo:</p>
+            <div className="grid grid-cols-1 gap-2">
+              {/* Login imediato (combinado criar + login) */}
+              <div className="flex justify-between space-x-2">
+                <Button 
+                  type="button"
+                  onClick={() => createDemoUser("owner")}
+                  disabled={!!isCreatingDemo}
+                  variant="outline"
+                  className="text-xs py-1 flex-1 h-auto"
+                >
+                  {isCreatingDemo === "owner" ? (
+                    <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Dono</>
+                  ) : "Login Dono"}
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={() => createDemoUser("cityManager")}
+                  disabled={!!isCreatingDemo}
+                  variant="outline"
+                  className="text-xs py-1 flex-1 h-auto"
+                >
+                  {isCreatingDemo === "cityManager" ? (
+                    <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Gerente</>
+                  ) : "Login Gerente"}
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={() => createDemoUser("admin")}
+                  disabled={!!isCreatingDemo}
+                  variant="outline"
+                  className="text-xs py-1 flex-1 h-auto"
+                >
+                  {isCreatingDemo === "admin" ? (
+                    <><Loader2 className="h-3 w-3 animate-spin mr-1" /> Admin</>
+                  ) : "Login Admin"}
+                </Button>
+              </div>
+
+              {/* Preencher credenciais apenas */}
+              <div className="flex justify-between space-x-2">
+                <Button 
+                  type="button"
+                  onClick={() => fillDemoCredentials("owner")}
+                  disabled={!!isCreatingDemo || isLoading}
+                  variant="ghost"
+                  className="text-xs py-1 flex-1 h-auto text-gray-500"
+                >
+                  Preencher Dono
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={() => fillDemoCredentials("cityManager")}
+                  disabled={!!isCreatingDemo || isLoading}
+                  variant="ghost"
+                  className="text-xs py-1 flex-1 h-auto text-gray-500"
+                >
+                  Preencher Gerente
+                </Button>
+                <Button 
+                  type="button"
+                  onClick={() => fillDemoCredentials("admin")}
+                  disabled={!!isCreatingDemo || isLoading}
+                  variant="ghost"
+                  className="text-xs py-1 flex-1 h-auto text-gray-500"
+                >
+                  Preencher Admin
+                </Button>
+              </div>
             </div>
           </div>
         </form>
