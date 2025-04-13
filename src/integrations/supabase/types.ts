@@ -567,39 +567,6 @@ export type Database = {
         }
         Relationships: []
       }
-      usuarios: {
-        Row: {
-          created_at: string
-          documento: string | null
-          email: string | null
-          nome_usuario: string | null
-          senha: string | null
-          telefone: string | null
-          tipo_usuario: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          documento?: string | null
-          email?: string | null
-          nome_usuario?: string | null
-          senha?: string | null
-          telefone?: string | null
-          tipo_usuario?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          documento?: string | null
-          email?: string | null
-          nome_usuario?: string | null
-          senha?: string | null
-          telefone?: string | null
-          tipo_usuario?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
       Usuarios: {
         Row: {
           created_at: string
