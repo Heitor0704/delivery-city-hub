@@ -12,7 +12,7 @@ const Index = () => {
     if (isLoading) return;
     
     if (isAuthenticated && user) {
-      console.log("User authenticated, redirecting to appropriate dashboard");
+      console.log("User authenticated, redirecting to appropriate dashboard", user);
       // Se estiver autenticado, redireciona para o dashboard apropriado
       switch (user.role) {
         case "owner":
@@ -25,6 +25,7 @@ const Index = () => {
           navigate('/admin-dashboard', { replace: true });
           break;
         default:
+          console.warn("Unknown user role:", user.role);
           navigate('/', { replace: true });
       }
     } else {

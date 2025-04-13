@@ -10,7 +10,7 @@ interface User {
   id: string;
   email: string;
   name?: string;
-  role: UserRole;
+  role: UserRole; // This will store the tipo_usuario value
   avatar?: string;
 }
 
@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Fetch user profile from the Usuarios table
+  // Fetch user profile from the Usuarios table (with capital U)
   const fetchUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
       setIsLoading(true);
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           id: supabaseUser.id,
           email: supabaseUser.email || "",
           name: data.nome_usuario || supabaseUser.email?.split('@')[0] || "",
-          role: userRole,
+          role: userRole, // Here we're using tipo_usuario as the role
         });
       } else {
         console.warn("No user profile found");
