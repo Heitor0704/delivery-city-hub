@@ -1,933 +1,270 @@
+
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { ProfileSettings } from "@/components/settings/ProfileSettings";
 import { 
-  Save, 
-  Building2, 
+  AlertCircle, 
+  Check, 
+  Bell, 
   CreditCard, 
-  Truck, 
-  CheckCircle2,
-  ImagePlus,
-  MapPin,
-  Plus,
-  Clock,
-  Trash2
+  Save
 } from "lucide-react";
-
-interface EntregaRegiao {
-  nome: string;
-  taxa: string;
-  tempo: string;
-}
-
-interface EntregaConfig {
-  tipo: string;
-  valorKm: string;
-  taxaMinima: string;
-  tempoEstimado: string;
-  regioes: EntregaRegiao[];
-  taxaFixa: string;
-}
-
-interface MercadoPagoConfig {
-  ativo: boolean;
-  publicKey: string;
-  accessToken: string;
-}
-
-interface BusinessHours {
-  dayOfWeek: string;
-  isOpen: boolean;
-  intervals: TimeInterval[];
-}
-
-interface TimeInterval {
-  id: string;
-  start: string;
-  end: string;
-}
-
-interface EstablishmentData {
-  nome: string;
-  razaoSocial: string;
-  cnpj: string;
-  telefone: string;
-  email: string;
-  endereco: string;
-  bairro: string;
-  cidade: string;
-  estado: string;
-  cep: string;
-  horarioFuncionamento: string;
-  logo: string;
-  banner: string;
-  mercadoPago: MercadoPagoConfig;
-  entrega: EntregaConfig;
-  businessHours: BusinessHours[];
-}
-
-const daysOfWeek = [
-  { value: "sunday", label: "Domingo" },
-  { value: "monday", label: "Segunda-feira" },
-  { value: "tuesday", label: "Terça-feira" },
-  { value: "wednesday", label: "Quarta-feira" },
-  { value: "thursday", label: "Quinta-feira" },
-  { value: "friday", label: "Sexta-feira" },
-  { value: "saturday", label: "Sábado" }
-];
-
-const establishmentData: EstablishmentData = {
-  nome: "Hambúrguer do Zé",
-  razaoSocial: "José Restaurantes Ltda.",
-  cnpj: "12.345.678/0001-90",
-  telefone: "(11) 98765-4321",
-  email: "contato@hamburguerdoze.com.br",
-  endereco: "Avenida Paulista, 1000",
-  bairro: "Bela Vista",
-  cidade: "São Paulo",
-  estado: "SP",
-  cep: "01310-000",
-  horarioFuncionamento: "De segunda a domingo, das 11h às 23h",
-  logo: "/placeholder.svg",
-  banner: "/placeholder.svg",
-  mercadoPago: {
-    ativo: false,
-    publicKey: "",
-    accessToken: "",
-  },
-  entrega: {
-    tipo: "km",
-    valorKm: "5,00",
-    taxaMinima: "5,00",
-    tempoEstimado: "30-45",
-    regioes: [
-      { nome: "Centro", taxa: "5,00", tempo: "30-45" },
-      { nome: "Zona Norte", taxa: "7,00", tempo: "40-55" },
-      { nome: "Zona Sul", taxa: "7,00", tempo: "40-55" },
-    ],
-    taxaFixa: "5,00"
-  },
-  businessHours: [
-    { 
-      dayOfWeek: "monday", 
-      isOpen: true, 
-      intervals: [
-        { id: "1", start: "08:00", end: "12:00" },
-        { id: "2", start: "13:00", end: "22:00" }
-      ]
-    },
-    { 
-      dayOfWeek: "tuesday", 
-      isOpen: true, 
-      intervals: [
-        { id: "1", start: "08:00", end: "12:00" },
-        { id: "2", start: "13:00", end: "22:00" }
-      ]
-    },
-    { 
-      dayOfWeek: "wednesday", 
-      isOpen: true, 
-      intervals: [
-        { id: "1", start: "08:00", end: "12:00" },
-        { id: "2", start: "13:00", end: "22:00" }
-      ]
-    },
-    { 
-      dayOfWeek: "thursday", 
-      isOpen: true, 
-      intervals: [
-        { id: "1", start: "08:00", end: "12:00" },
-        { id: "2", start: "13:00", end: "22:00" }
-      ]
-    },
-    { 
-      dayOfWeek: "friday", 
-      isOpen: true, 
-      intervals: [
-        { id: "1", start: "08:00", end: "12:00" },
-        { id: "2", start: "13:00", end: "22:00" }
-      ]
-    },
-    { 
-      dayOfWeek: "saturday", 
-      isOpen: true, 
-      intervals: [
-        { id: "1", start: "09:00", end: "21:00" }
-      ]
-    },
-    { 
-      dayOfWeek: "sunday", 
-      isOpen: false, 
-      intervals: []
-    }
-  ]
-};
+import { useToast } from "@/hooks/use-toast";
 
 export default function OwnerSettings() {
   const [activeTab, setActiveTab] = useState("profile");
-  const [formData, setFormData] = useState<EstablishmentData>(establishmentData);
-  const [entregaTipo, setEntregaTipo] = useState(establishmentData.entrega.tipo);
-  const [logoPreview, setLogoPreview] = useState(establishmentData.logo);
-  const [bannerPreview, setBannerPreview] = useState(establishmentData.banner);
   const { toast } = useToast();
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  
+  // Payment settings state
+  const [accessToken, setAccessToken] = useState("");
+  const [publicKey, setPublicKey] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Notification settings state
+  const [orderReceivedNotif, setOrderReceivedNotif] = useState(true);
+  const [orderCanceledNotif, setOrderCanceledNotif] = useState(true);
+  const [reviewNotif, setReviewNotif] = useState(true);
+  const [promotionNotif, setPromotionNotif] = useState(false);
+  
+  const handlePaymentSettingsSave = () => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Configurações salvas",
+        description: "Suas configurações de pagamento foram atualizadas com sucesso.",
+      });
+    }, 1000);
   };
-
-  const handleNestedInputChange = (section: keyof EstablishmentData, field: string, value: any) => {
-    setFormData(prev => {
-      if (section === 'mercadoPago') {
-        return {
-          ...prev,
-          mercadoPago: {
-            ...prev.mercadoPago,
-            [field]: value
-          }
-        };
-      } else if (section === 'entrega') {
-        return {
-          ...prev,
-          entrega: {
-            ...prev.entrega,
-            [field]: value
-          }
-        };
-      }
-      return prev;
-    });
-  };
-
-  const handleEntregaTipoChange = (tipo: string) => {
-    setEntregaTipo(tipo);
-    handleNestedInputChange('entrega', 'tipo', tipo);
-  };
-
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setLogoPreview(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  };
-
-  const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setBannerPreview(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  };
-
-  const toggleDayStatus = (dayOfWeek: string) => {
-    setFormData(prev => {
-      const newBusinessHours = [...prev.businessHours];
-      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
-      
-      if (dayIndex !== -1) {
-        newBusinessHours[dayIndex] = {
-          ...newBusinessHours[dayIndex],
-          isOpen: !newBusinessHours[dayIndex].isOpen,
-          intervals: !newBusinessHours[dayIndex].isOpen ? [] : newBusinessHours[dayIndex].intervals
-        };
-      }
-      
-      return {
-        ...prev,
-        businessHours: newBusinessHours
-      };
-    });
-  };
-
-  const addTimeInterval = (dayOfWeek: string) => {
-    setFormData(prev => {
-      const newBusinessHours = [...prev.businessHours];
-      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
-      
-      if (dayIndex !== -1) {
-        const newId = (newBusinessHours[dayIndex].intervals.length + 1).toString();
-        
-        newBusinessHours[dayIndex] = {
-          ...newBusinessHours[dayIndex],
-          intervals: [
-            ...newBusinessHours[dayIndex].intervals,
-            { id: newId, start: "08:00", end: "18:00" }
-          ]
-        };
-      }
-      
-      return {
-        ...prev,
-        businessHours: newBusinessHours
-      };
-    });
-  };
-
-  const removeTimeInterval = (dayOfWeek: string, intervalId: string) => {
-    setFormData(prev => {
-      const newBusinessHours = [...prev.businessHours];
-      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
-      
-      if (dayIndex !== -1) {
-        newBusinessHours[dayIndex] = {
-          ...newBusinessHours[dayIndex],
-          intervals: newBusinessHours[dayIndex].intervals.filter(
-            interval => interval.id !== intervalId
-          )
-        };
-      }
-      
-      return {
-        ...prev,
-        businessHours: newBusinessHours
-      };
-    });
-  };
-
-  const updateTimeInterval = (
-    dayOfWeek: string, 
-    intervalId: string, 
-    field: keyof TimeInterval, 
-    value: string
-  ) => {
-    setFormData(prev => {
-      const newBusinessHours = [...prev.businessHours];
-      const dayIndex = newBusinessHours.findIndex(day => day.dayOfWeek === dayOfWeek);
-      
-      if (dayIndex !== -1) {
-        const intervals = [...newBusinessHours[dayIndex].intervals];
-        const intervalIndex = intervals.findIndex(interval => interval.id === intervalId);
-        
-        if (intervalIndex !== -1) {
-          intervals[intervalIndex] = {
-            ...intervals[intervalIndex],
-            [field]: value
-          };
-          
-          newBusinessHours[dayIndex] = {
-            ...newBusinessHours[dayIndex],
-            intervals
-          };
-        }
-      }
-      
-      return {
-        ...prev,
-        businessHours: newBusinessHours
-      };
-    });
-  };
-
-  const handleSaveSettings = () => {
-    toast({
-      title: "Configurações salvas",
-      description: "As configurações foram salvas com sucesso.",
-    });
+  
+  const handleNotificationSettingsSave = () => {
+    setIsLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+      toast({
+        title: "Configurações salvas",
+        description: "Suas configurações de notificação foram atualizadas com sucesso.",
+      });
+    }, 1000);
   };
 
   return (
     <PageLayout 
       title="Configurações"
-      description="Ajuste as configurações do seu estabelecimento."
+      description="Gerencie as configurações do seu estabelecimento."
     >
-      <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="w-full md:w-auto">
-          <TabsTrigger value="profile" className="flex-1 md:flex-none">
-            <Building2 className="mr-2 h-4 w-4" />
-            Perfil
-          </TabsTrigger>
-          <TabsTrigger value="payment" className="flex-1 md:flex-none">
-            <CreditCard className="mr-2 h-4 w-4" />
-            Pagamentos
-          </TabsTrigger>
-          <TabsTrigger value="delivery" className="flex-1 md:flex-none">
-            <Truck className="mr-2 h-4 w-4" />
-            Entregas
-          </TabsTrigger>
-          <TabsTrigger value="hours" className="flex-1 md:flex-none">
-            <Clock className="mr-2 h-4 w-4" />
-            Horários
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="profile" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informações do Estabelecimento</CardTitle>
-              <CardDescription>
-                Configure as informações básicas do seu estabelecimento que serão exibidas para os clientes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nome">Nome do Estabelecimento</Label>
+      <div className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-3 lg:w-auto">
+            <TabsTrigger value="profile">Perfil</TabsTrigger>
+            <TabsTrigger value="payments">Pagamentos</TabsTrigger>
+            <TabsTrigger value="notifications">Notificações</TabsTrigger>
+          </TabsList>
+          
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-4">
+            <ProfileSettings />
+          </TabsContent>
+          
+          {/* Payments Tab */}
+          <TabsContent value="payments" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações de Pagamento</CardTitle>
+                <CardDescription>
+                  Configure suas credenciais do Mercado Pago para processar pagamentos.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-1">
+                  <Label htmlFor="accessToken">Access Token</Label>
                   <Input 
-                    id="nome" 
-                    name="nome" 
-                    value={formData.nome} 
-                    onChange={handleInputChange} 
+                    id="accessToken" 
+                    placeholder="Access Token do Mercado Pago" 
+                    value={accessToken} 
+                    onChange={(e) => setAccessToken(e.target.value)} 
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Você pode obter seu Access Token no painel do Mercado Pago.
+                  </p>
+                </div>
+                
+                <div className="space-y-1">
+                  <Label htmlFor="publicKey">Chave Pública</Label>
+                  <Input 
+                    id="publicKey" 
+                    placeholder="Chave Pública do Mercado Pago" 
+                    value={publicKey} 
+                    onChange={(e) => setPublicKey(e.target.value)} 
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="razaoSocial">Razão Social</Label>
-                  <Input 
-                    id="razaoSocial" 
-                    name="razaoSocial" 
-                    value={formData.razaoSocial} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="cnpj">CNPJ</Label>
-                  <Input 
-                    id="cnpj" 
-                    name="cnpj" 
-                    value={formData.cnpj} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="telefone">Telefone</Label>
-                  <Input 
-                    id="telefone" 
-                    name="telefone" 
-                    value={formData.telefone} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    name="email" 
-                    type="email" 
-                    value={formData.email} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-2">
-                <Label htmlFor="endereco">Endereço</Label>
-                <Input 
-                  id="endereco" 
-                  name="endereco" 
-                  value={formData.endereco} 
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="bairro">Bairro</Label>
-                  <Input 
-                    id="bairro" 
-                    name="bairro" 
-                    value={formData.bairro} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="cidade">Cidade</Label>
-                  <Input 
-                    id="cidade" 
-                    name="cidade" 
-                    value={formData.cidade} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="estado">Estado</Label>
-                  <Select
-                    value={formData.estado}
-                    onValueChange={(value) => setFormData({...formData, estado: value})}
-                  >
-                    <SelectTrigger id="estado">
-                      <SelectValue placeholder="Estado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AC">Acre</SelectItem>
-                      <SelectItem value="AL">Alagoas</SelectItem>
-                      <SelectItem value="AP">Amapá</SelectItem>
-                      <SelectItem value="AM">Amazonas</SelectItem>
-                      <SelectItem value="BA">Bahia</SelectItem>
-                      <SelectItem value="CE">Ceará</SelectItem>
-                      <SelectItem value="DF">Distrito Federal</SelectItem>
-                      <SelectItem value="ES">Espírito Santo</SelectItem>
-                      <SelectItem value="GO">Goiás</SelectItem>
-                      <SelectItem value="MA">Maranhão</SelectItem>
-                      <SelectItem value="MT">Mato Grosso</SelectItem>
-                      <SelectItem value="MS">Mato Grosso do Sul</SelectItem>
-                      <SelectItem value="MG">Minas Gerais</SelectItem>
-                      <SelectItem value="PA">Pará</SelectItem>
-                      <SelectItem value="PB">Paraíba</SelectItem>
-                      <SelectItem value="PR">Paraná</SelectItem>
-                      <SelectItem value="PE">Pernambuco</SelectItem>
-                      <SelectItem value="PI">Piauí</SelectItem>
-                      <SelectItem value="RJ">Rio de Janeiro</SelectItem>
-                      <SelectItem value="RN">Rio Grande do Norte</SelectItem>
-                      <SelectItem value="RS">Rio Grande do Sul</SelectItem>
-                      <SelectItem value="RO">Rondônia</SelectItem>
-                      <SelectItem value="RR">Roraima</SelectItem>
-                      <SelectItem value="SC">Santa Catarina</SelectItem>
-                      <SelectItem value="SP">São Paulo</SelectItem>
-                      <SelectItem value="SE">Sergipe</SelectItem>
-                      <SelectItem value="TO">Tocantins</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="cep">CEP</Label>
-                  <Input 
-                    id="cep" 
-                    name="cep" 
-                    value={formData.cep} 
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="horarioFuncionamento">Horário de Funcionamento</Label>
-                <Textarea 
-                  id="horarioFuncionamento" 
-                  name="horarioFuncionamento" 
-                  value={formData.horarioFuncionamento} 
-                  onChange={handleInputChange}
-                  rows={2}
-                />
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-3">
-                <Label>Logo do Estabelecimento</Label>
-                <div className="flex items-center gap-4">
-                  <div className="h-20 w-20 rounded-md overflow-hidden border">
-                    <img 
-                      src={logoPreview} 
-                      alt="Logo" 
-                      className="h-full w-full object-contain"
-                    />
-                  </div>
-                  <div>
-                    <Button variant="outline" size="sm" asChild>
-                      <label htmlFor="logo-upload" className="cursor-pointer">
-                        <ImagePlus className="mr-2 h-4 w-4" />
-                        Alterar Logo
-                      </label>
-                    </Button>
-                    <input
-                      type="file"
-                      id="logo-upload"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleLogoChange}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <Label>Banner do Estabelecimento</Label>
-                <div className="flex items-center gap-4">
-                  <div className="h-20 w-40 rounded-md overflow-hidden border">
-                    <img 
-                      src={bannerPreview} 
-                      alt="Banner" 
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <Button variant="outline" size="sm" asChild>
-                      <label htmlFor="banner-upload" className="cursor-pointer">
-                        <ImagePlus className="mr-2 h-4 w-4" />
-                        Alterar Banner
-                      </label>
-                    </Button>
-                    <input
-                      type="file"
-                      id="banner-upload"
-                      className="hidden"
-                      accept="image/*"
-                      onChange={handleBannerChange}
-                    />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="payment" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Integração com Mercado Pago</CardTitle>
-              <CardDescription>
-                Configure a integração com o Mercado Pago para aceitar pagamentos online.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
-                <Switch 
-                  id="mp-ativo" 
-                  checked={formData.mercadoPago.ativo} 
-                  onCheckedChange={(checked) => handleNestedInputChange('mercadoPago', 'ativo', checked)} 
-                />
-                <Label htmlFor="mp-ativo">Ativar pagamentos online com Mercado Pago</Label>
-              </div>
-              
-              {formData.mercadoPago.ativo && (
-                <div className="space-y-4 pt-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="mp-publicKey">Public Key</Label>
-                    <Input 
-                      id="mp-publicKey" 
-                      value={formData.mercadoPago.publicKey} 
-                      onChange={(e) => handleNestedInputChange('mercadoPago', 'publicKey', e.target.value)}
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      A Public Key é utilizada para o checkout no frontend.
-                    </p>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="mp-accessToken">Access Token</Label>
-                    <Input 
-                      id="mp-accessToken" 
-                      type="password"
-                      value={formData.mercadoPago.accessToken} 
-                      onChange={(e) => handleNestedInputChange('mercadoPago', 'accessToken', e.target.value)}
-                    />
-                    <p className="text-sm text-muted-foreground">
-                      O Access Token é necessário para processamento de pagamentos.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-green-50 p-4 rounded-md border border-green-200">
-                    <div className="flex gap-2">
-                      <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      <div>
-                        <h4 className="font-medium text-green-800">Como obter suas credenciais do Mercado Pago</h4>
-                        <ol className="text-sm text-green-700 mt-1 space-y-1 list-decimal ml-4">
-                          <li>Acesse sua conta do Mercado Pago</li>
-                          <li>Vá para a seção de Desenvolvedores</li>
-                          <li>Clique em "Credenciais"</li>
-                          <li>Copie suas chaves para os campos acima</li>
-                        </ol>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="delivery" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Configurações de Entrega</CardTitle>
-              <CardDescription>
-                Defina como será calculado o valor da entrega para os clientes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-4">
-                <Label>Método de Cálculo da Taxa de Entrega</Label>
-                <RadioGroup 
-                  value={entregaTipo}
-                  onValueChange={handleEntregaTipoChange}
-                  className="flex flex-col space-y-1"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="km" id="r1" />
-                    <Label htmlFor="r1">Por Quilômetro (cálculo automático)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="regioes" id="r2" />
-                    <Label htmlFor="r2">Por Região (valores fixos por bairro)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="fixo" id="r3" />
-                    <Label htmlFor="r3">Taxa Fixa (mesmo valor para todos)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              
-              {entregaTipo === "km" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="valorKm">Valor por KM (R$)</Label>
-                    <Input 
-                      id="valorKm" 
-                      value={formData.entrega.valorKm} 
-                      onChange={(e) => handleNestedInputChange('entrega', 'valorKm', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="taxaMinima">Taxa Mínima (R$)</Label>
-                    <Input 
-                      id="taxaMinima" 
-                      value={formData.entrega.taxaMinima} 
-                      onChange={(e) => handleNestedInputChange('entrega', 'taxaMinima', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="tempoEstimado">Tempo Estimado (min)</Label>
-                    <Input 
-                      id="tempoEstimado" 
-                      value={formData.entrega.tempoEstimado} 
-                      onChange={(e) => handleNestedInputChange('entrega', 'tempoEstimado', e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              {entregaTipo === "regioes" && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="grid grid-cols-3 gap-4 bg-muted/50 p-2 rounded-md">
-                      <div><strong>Região/Bairro</strong></div>
-                      <div><strong>Taxa de Entrega</strong></div>
-                      <div><strong>Tempo Estimado</strong></div>
-                    </div>
-                    
-                    {formData.entrega.regioes.map((regiao, index) => (
-                      <div key={index} className="grid grid-cols-3 gap-4 border-b pb-2">
-                        <Input 
-                          value={regiao.nome} 
-                          onChange={(e) => {
-                            const newRegioes = [...formData.entrega.regioes];
-                            newRegioes[index].nome = e.target.value;
-                            handleNestedInputChange('entrega', 'regioes', newRegioes);
-                          }}
-                        />
-                        <div className="flex items-center">
-                          <span className="mr-2">R$</span>
-                          <Input 
-                            value={regiao.taxa} 
-                            onChange={(e) => {
-                              const newRegioes = [...formData.entrega.regioes];
-                              newRegioes[index].taxa = e.target.value;
-                              handleNestedInputChange('entrega', 'regioes', newRegioes);
-                            }}
-                          />
-                        </div>
-                        <div className="flex items-center">
-                          <Input 
-                            value={regiao.tempo} 
-                            onChange={(e) => {
-                              const newRegioes = [...formData.entrega.regioes];
-                              newRegioes[index].tempo = e.target.value;
-                              handleNestedInputChange('entrega', 'regioes', newRegioes);
-                            }}
-                          />
-                          <span className="ml-2">min</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Button variant="outline" className="flex items-center">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Adicionar Região
+                <div className="pt-4 flex justify-end">
+                  <Button onClick={handlePaymentSettingsSave} disabled={isLoading}>
+                    {isLoading ? (
+                      <>Salvando...</>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Salvar Configurações
+                      </>
+                    )}
                   </Button>
                 </div>
-              )}
-              
-              {entregaTipo === "fixo" && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="taxaFixa">Taxa Fixa de Entrega (R$)</Label>
-                    <Input 
-                      id="taxaFixa" 
-                      value={formData.entrega.taxaFixa} 
-                      onChange={(e) => handleNestedInputChange('entrega', 'taxaFixa', e.target.value)}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="tempoEstimadoFixo">Tempo Estimado (min)</Label>
-                    <Input 
-                      id="tempoEstimadoFixo" 
-                      value={formData.entrega.tempoEstimado} 
-                      onChange={(e) => handleNestedInputChange('entrega', 'tempoEstimado', e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
-              
-              <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
-                <div className="flex gap-2">
-                  <MapPin className="h-5 w-5 text-amber-600 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-medium text-amber-800">Dica sobre entregas</h4>
-                    <p className="text-sm text-amber-700 mt-1">
-                      O método por quilômetro é mais preciso e justo, calculando a distância real entre o estabelecimento e o cliente.
-                      Recomendamos utilizar esse método para melhorar a satisfação dos clientes.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="hours" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Horários de Funcionamento</CardTitle>
-              <CardDescription>
-                Configure os horários em que seu estabelecimento estará aberto para atendimento.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {daysOfWeek.map(day => {
-                  const dayData = formData.businessHours.find(d => d.dayOfWeek === day.value);
-                  const isOpen = dayData?.isOpen || false;
-                  
-                  return (
-                    <div key={day.value} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center">
-                          <h3 className="text-lg font-medium">{day.label}</h3>
-                          <div className="ml-4 flex items-center space-x-2">
-                            <Switch 
-                              id={`day-${day.value}`}
-                              checked={isOpen}
-                              onCheckedChange={() => toggleDayStatus(day.value)}
-                            />
-                            <Label htmlFor={`day-${day.value}`}>
-                              {isOpen ? "Aberto" : "Fechado"}
-                            </Label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {isOpen && (
-                        <div className="space-y-4">
-                          <div className="text-sm text-muted-foreground mb-2">
-                            Defina os intervalos de horário em que o estabelecimento estará aberto:
-                          </div>
-                          
-                          {dayData?.intervals.map(interval => (
-                            <div key={interval.id} className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-center">
-                              <div className="sm:col-span-2">
-                                <Label htmlFor={`start-${day.value}-${interval.id}`}>Abertura</Label>
-                                <Input
-                                  id={`start-${day.value}-${interval.id}`}
-                                  type="time"
-                                  value={interval.start}
-                                  onChange={(e) => updateTimeInterval(
-                                    day.value, 
-                                    interval.id, 
-                                    'start', 
-                                    e.target.value
-                                  )}
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div className="sm:col-span-2">
-                                <Label htmlFor={`end-${day.value}-${interval.id}`}>Fechamento</Label>
-                                <Input
-                                  id={`end-${day.value}-${interval.id}`}
-                                  type="time"
-                                  value={interval.end}
-                                  onChange={(e) => updateTimeInterval(
-                                    day.value, 
-                                    interval.id, 
-                                    'end', 
-                                    e.target.value
-                                  )}
-                                  className="mt-1"
-                                />
-                              </div>
-                              <div className="flex justify-end items-end">
-                                <Button
-                                  type="button"
-                                  variant="destructive"
-                                  size="icon"
-                                  onClick={() => removeTimeInterval(day.value, interval.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                          
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => addTimeInterval(day.value)}
-                            className="mt-2"
-                          >
-                            <Plus className="mr-2 h-4 w-4" />
-                            Adicionar Intervalo
-                          </Button>
-                        </div>
-                      )}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle>Métodos de Pagamento Aceitos</CardTitle>
+                <CardDescription>
+                  Selecione quais métodos de pagamento você deseja aceitar.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <CreditCard className="h-5 w-5" />
+                      <Label htmlFor="creditCard">Cartão de Crédito</Label>
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-      
-      <div className="mt-6 flex justify-end">
-        <Button 
-          className="bg-fomex-orange hover:bg-fomex-orange/90"
-          onClick={handleSaveSettings}
-        >
-          <Save className="mr-2 h-4 w-4" />
-          Salvar Configurações
-        </Button>
+                    <Switch id="creditCard" defaultChecked />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <CreditCard className="h-5 w-5" />
+                      <Label htmlFor="debitCard">Cartão de Débito</Label>
+                    </div>
+                    <Switch id="debitCard" defaultChecked />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <AlertCircle className="h-5 w-5" />
+                      <Label htmlFor="pix">Pix</Label>
+                    </div>
+                    <Switch id="pix" defaultChecked />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Check className="h-5 w-5" />
+                      <Label htmlFor="cash">Dinheiro (na entrega)</Label>
+                    </div>
+                    <Switch id="cash" defaultChecked />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Eventos de Notificação</CardTitle>
+                <CardDescription>
+                  Configure quais eventos você deseja receber notificações.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Bell className="h-5 w-5" />
+                      <div>
+                        <Label htmlFor="orderReceived">Pedido recebido</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receba notificações quando novos pedidos chegarem.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch 
+                      id="orderReceived" 
+                      checked={orderReceivedNotif} 
+                      onCheckedChange={setOrderReceivedNotif}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Bell className="h-5 w-5" />
+                      <div>
+                        <Label htmlFor="orderCanceled">Pedido cancelado</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receba notificações quando pedidos forem cancelados.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch 
+                      id="orderCanceled" 
+                      checked={orderCanceledNotif} 
+                      onCheckedChange={setOrderCanceledNotif}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Bell className="h-5 w-5" />
+                      <div>
+                        <Label htmlFor="review">Avaliações</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receba notificações quando clientes deixarem avaliações.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch 
+                      id="review" 
+                      checked={reviewNotif} 
+                      onCheckedChange={setReviewNotif}
+                    />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Bell className="h-5 w-5" />
+                      <div>
+                        <Label htmlFor="promotion">Promoções</Label>
+                        <p className="text-sm text-muted-foreground">
+                          Receba notificações sobre promoções e campanhas.
+                        </p>
+                      </div>
+                    </div>
+                    <Switch 
+                      id="promotion" 
+                      checked={promotionNotif} 
+                      onCheckedChange={setPromotionNotif}
+                    />
+                  </div>
+                </div>
+                
+                <div className="pt-4 flex justify-end">
+                  <Button onClick={handleNotificationSettingsSave} disabled={isLoading}>
+                    {isLoading ? (
+                      <>Salvando...</>
+                    ) : (
+                      <>
+                        <Save className="mr-2 h-4 w-4" />
+                        Salvar Configurações
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </PageLayout>
   );

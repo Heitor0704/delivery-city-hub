@@ -125,9 +125,8 @@ const App = () => (
               <Route path="/admin/reports" element={<AdminReports />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
 
-              {/* Rotas compartilhadas */}
-              <Route path="/profile" element={<div className="p-4">Página de Perfil em construção</div>} />
-              <Route path="/settings" element={<div className="p-4">Página de Configurações em construção</div>} />
+              {/* Rotas compartilhadas - Removida a rota de perfil */}
+              <Route path="/settings" element={<Navigate to="/dashboard" replace />} />
             </Route>
 
             {/* Rota 404 */}
