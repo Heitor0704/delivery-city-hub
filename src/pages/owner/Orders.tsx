@@ -20,23 +20,34 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   DropdownMenu as Dropdown,
   DropdownMenuContent as DropdownContent,
   DropdownMenuItem as DropdownItem,
   DropdownMenuTrigger as DropdownTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, Search, Filter, Printer, MoreVertical, Eye } from "lucide-react";
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Printer, 
+  MoreVertical, 
+  Eye, 
+  CalendarIcon, 
+  List, 
+  KanbanSquare 
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { OrderDetails } from "@/components/order/OrderDetails";
 import { OrderStatusSelect } from "@/components/order/OrderStatusSelect";
+import { NewOrderForm } from "@/components/order/NewOrderForm";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const statusColors: Record<string, string> = {
   aguardando: "bg-yellow-100 text-yellow-800 hover:bg-yellow-100",
@@ -84,7 +95,7 @@ const orders = [
     id: "#PED-1236",
     cliente: "Pedro Almeida",
     valor: "R$ 78,90",
-    data: "12/04/2023 14:05",
+    data: "13/04/2023 14:05",
     status: "entregando",
     endereco: "Rua das Árvores, 789",
     itens: [
@@ -101,7 +112,7 @@ const orders = [
     id: "#PED-1237",
     cliente: "Ana Costa",
     valor: "R$ 45,00",
-    data: "12/04/2023 13:50",
+    data: "13/04/2023 13:50",
     status: "entregue",
     endereco: "Rua da Praça, 101",
     itens: [
@@ -116,7 +127,7 @@ const orders = [
     id: "#PED-1238",
     cliente: "Carlos Mendes",
     valor: "R$ 27,80",
-    data: "12/04/2023 13:45",
+    data: "14/04/2023 13:45",
     status: "cancelado",
     endereco: "Av. Central, 202",
     itens: [
@@ -136,21 +147,30 @@ export default function OwnerOrders() {
   const [statusFilter, setStatusFilter] = useState("todos");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [orderDetailsOpen, setOrderDetailsOpen] = useState(false);
+  const [newOrderOpen, setNewOrderOpen] = useState(false);
+  const [ordersList, setOrdersList] = useState([...orders]);
+  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const { toast } = useToast();
 
-  const filteredOrders = orders.filter((order) => {
+  const filteredOrders = ordersList.filter((order) => {
     const matchesSearch =
       order.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.id.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "todos" || order.status === statusFilter;
     
-    return matchesSearch && matchesStatus;
+    const matchesDate = !date || order.data.includes(format(date, "dd/MM/yyyy", { locale: ptBR }));
+    
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
   const handleStatusChange = (orderId: string, newStatus: string) => {
-    // Em um ambiente real, aqui faríamos uma chamada à API para atualizar o status
-    // Por enquanto, apenas mostramos um toast de confirmação
+    const updatedOrders = ordersList.map(order => 
+      order.id === orderId ? { ...order, status: newStatus } : order
+    );
+    setOrdersList(updatedOrders);
+    
     toast({
       title: "Status atualizado",
       description: `Pedido ${orderId} teve seu status alterado para ${newStatus}`,
@@ -158,7 +178,6 @@ export default function OwnerOrders() {
   };
 
   const handlePrintOrder = (order: any) => {
-    // Abre uma nova janela para impressão
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
       toast({
@@ -169,7 +188,6 @@ export default function OwnerOrders() {
       return;
     }
 
-    // Conteúdo HTML para impressão
     printWindow.document.write(`
       <html>
         <head>
@@ -226,11 +244,139 @@ export default function OwnerOrders() {
     `);
     
     printWindow.document.close();
-    // Aguarda o carregamento do conteúdo
     printWindow.onload = function() {
       printWindow.print();
-      // printWindow.close();
     };
+  };
+
+  const handleCreateOrder = (orderData: any) => {
+    setOrdersList([orderData, ...ordersList]);
+  };
+
+  const renderKanbanView = () => {
+    const columns = [
+      { id: "aguardando", title: "Aguardando" },
+      { id: "preparando", title: "Preparando" },
+      { id: "entregando", title: "Entregando" },
+      { id: "entregue", title: "Entregue" },
+      { id: "cancelado", title: "Cancelado" }
+    ];
+    
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        {columns.map(column => {
+          const columnOrders = filteredOrders.filter(order => order.status === column.id);
+          return (
+            <div key={column.id} className="flex flex-col h-full">
+              <div className={`p-2 text-center font-medium rounded-t-md ${statusColors[column.id]}`}>
+                {column.title} ({columnOrders.length})
+              </div>
+              <div className="bg-gray-50 flex-1 p-2 rounded-b-md overflow-y-auto max-h-[65vh]">
+                <div className="space-y-3">
+                  {columnOrders.map(order => (
+                    <Card key={order.id} className="cursor-pointer hover:shadow-md transition-shadow" 
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setOrderDetailsOpen(true);
+                      }}>
+                      <CardContent className="p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-bold">{order.id}</span>
+                          <Badge variant="outline">{format(new Date(order.data.split(' ')[0].split('/').reverse().join('-')), "HH:mm")}</Badge>
+                        </div>
+                        <p className="text-sm truncate">{order.cliente}</p>
+                        <p className="text-sm text-gray-500 truncate">{order.endereco}</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <span className="text-sm">{order.itens.length} itens</span>
+                          <span className="font-medium">{order.valor}</span>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {columnOrders.length === 0 && (
+                    <div className="text-center p-4 text-sm text-gray-500">
+                      Nenhum pedido
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderListView = () => {
+    return (
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pedido</TableHead>
+                <TableHead>Cliente</TableHead>
+                <TableHead>Valor</TableHead>
+                <TableHead>Data</TableHead>
+                <TableHead>Endereço</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredOrders.length > 0 ? (
+                filteredOrders.map((order) => (
+                  <TableRow key={order.id}>
+                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell>{order.cliente}</TableCell>
+                    <TableCell>{order.valor}</TableCell>
+                    <TableCell>{order.data}</TableCell>
+                    <TableCell className="max-w-[200px] truncate">{order.endereco}</TableCell>
+                    <TableCell>
+                      <OrderStatusSelect 
+                        orderId={order.id}
+                        currentStatus={order.status}
+                        onStatusChange={(status) => handleStatusChange(order.id, status)}
+                      />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end">
+                        <Dropdown>
+                          <DropdownTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownTrigger>
+                          <DropdownContent align="end">
+                            <DropdownItem onClick={() => {
+                              setSelectedOrder(order);
+                              setOrderDetailsOpen(true);
+                            }}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              Visualizar detalhes
+                            </DropdownItem>
+                            <DropdownItem onClick={() => handlePrintOrder(order)}>
+                              <Printer className="mr-2 h-4 w-4" />
+                              Imprimir pedido
+                            </DropdownItem>
+                          </DropdownContent>
+                        </Dropdown>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                    Nenhum pedido encontrado.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    );
   };
 
   return (
@@ -238,15 +384,15 @@ export default function OwnerOrders() {
       title="Gerenciar Pedidos"
       description="Visualize e gerencie todos os pedidos do seu estabelecimento."
       actions={
-        <Button size="sm">
+        <Button size="sm" onClick={() => setNewOrderOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Novo Pedido
         </Button>
       }
     >
       <div className="flex flex-col space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4 items-end">
-          <div className="relative flex-1">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="relative flex-1 min-w-[250px]">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Buscar por cliente ou número do pedido..."
@@ -255,7 +401,8 @@ export default function OwnerOrders() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex items-center gap-2">
+          
+          <div className="flex items-center gap-2 min-w-[180px]">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select
               value={statusFilter}
@@ -274,75 +421,59 @@ export default function OwnerOrders() {
               </SelectContent>
             </Select>
           </div>
+          
+          <div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={`justify-start text-left font-normal w-[240px] ${!date ? 'text-muted-foreground' : ''}`}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {date ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR }) : "Filtrar por data"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(newDate) => {
+                    if (newDate?.getTime() === date?.getTime()) {
+                      setDate(undefined);
+                    } else {
+                      setDate(newDate);
+                    }
+                  }}
+                  initialFocus
+                  locale={ptBR}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="flex ml-auto gap-2">
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+              className="flex-shrink-0"
+            >
+              <List className="h-4 w-4" />
+              <span className="sr-only">Visão em Lista</span>
+            </Button>
+            <Button
+              variant={viewMode === "kanban" ? "default" : "outline"}
+              size="icon"
+              onClick={() => setViewMode("kanban")}
+              className="flex-shrink-0"
+            >
+              <KanbanSquare className="h-4 w-4" />
+              <span className="sr-only">Visão em Kanban</span>
+            </Button>
+          </div>
         </div>
         
-        <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Pedido</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Endereço</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredOrders.length > 0 ? (
-                  filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>{order.cliente}</TableCell>
-                      <TableCell>{order.valor}</TableCell>
-                      <TableCell>{order.data}</TableCell>
-                      <TableCell className="max-w-[200px] truncate">{order.endereco}</TableCell>
-                      <TableCell>
-                        <OrderStatusSelect 
-                          orderId={order.id}
-                          currentStatus={order.status}
-                          onStatusChange={(status) => handleStatusChange(order.id, status)}
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end">
-                          <Dropdown>
-                            <DropdownTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownTrigger>
-                            <DropdownContent align="end">
-                              <DropdownItem onClick={() => {
-                                setSelectedOrder(order);
-                                setOrderDetailsOpen(true);
-                              }}>
-                                <Eye className="mr-2 h-4 w-4" />
-                                Visualizar detalhes
-                              </DropdownItem>
-                              <DropdownItem onClick={() => handlePrintOrder(order)}>
-                                <Printer className="mr-2 h-4 w-4" />
-                                Imprimir pedido
-                              </DropdownItem>
-                            </DropdownContent>
-                          </Dropdown>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                      Nenhum pedido encontrado.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {viewMode === "list" ? renderListView() : renderKanbanView()}
       </div>
 
       {selectedOrder && (
@@ -354,6 +485,12 @@ export default function OwnerOrders() {
           onStatusChange={(status) => handleStatusChange(selectedOrder.id, status)}
         />
       )}
+
+      <NewOrderForm
+        open={newOrderOpen}
+        onOpenChange={setNewOrderOpen}
+        onCreateOrder={handleCreateOrder}
+      />
     </PageLayout>
   );
 }

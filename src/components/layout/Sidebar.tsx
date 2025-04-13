@@ -7,8 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { 
   LayoutDashboard, ClipboardList, Store, Users, Package, 
-  CreditCard, BarChart3, Settings, Building, Map, UserCog, LogOut, 
-  ChevronLeft, ChevronRight, ShoppingBag, Ticket
+  CreditCard, BarChart3, Settings, Map, UserCog, LogOut, 
+  ChevronLeft, ChevronRight, ShoppingBag, Ticket, KanbanSquare, List
 } from "lucide-react";
 import { FomeXLogo } from "@/components/ui/logo";
 

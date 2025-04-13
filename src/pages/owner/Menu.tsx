@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Dialog, 
@@ -14,17 +13,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetDescription, 
-  SheetFooter, 
-  SheetHeader, 
-  SheetTitle 
-} from "@/components/ui/sheet";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, AlertCircle } from "lucide-react";
+import { Plus, AlertCircle } from "lucide-react";
 import { CategoryList } from "@/components/menu/CategoryList";
 import { AddonList } from "@/components/menu/AddonList";
 import { MenuLevelList } from "@/components/menu/MenuLevelList";
@@ -39,6 +30,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function OwnerMenu() {
   const [activeTab, setActiveTab] = useState("categories");
@@ -52,6 +45,33 @@ export default function OwnerMenu() {
   // State for delete confirmation
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [itemToDelete, setItemToDelete] = useState<{id: string, type: string} | null>(null);
+  
+  // Form state
+  const [categoryForm, setCategoryForm] = useState({
+    name: "",
+    description: "",
+    active: true
+  });
+  
+  const [addonForm, setAddonForm] = useState({
+    name: "",
+    price: "",
+    active: true
+  });
+  
+  const [levelForm, setLevelForm] = useState({
+    name: "",
+    min: "0",
+    max: "1",
+    active: true
+  });
+  
+  const [optionForm, setOptionForm] = useState({
+    name: "",
+    price: "",
+    level: "",
+    active: true
+  });
   
   const { toast } = useToast();
 
@@ -72,11 +92,6 @@ export default function OwnerMenu() {
     }
   };
 
-  const handleEdit = (id: string, type: string) => {
-    console.log(`Edit ${type} with ID: ${id}`);
-    // Implement edit functionality here
-  };
-
   const handleDelete = (id: string, type: string) => {
     setItemToDelete({id, type});
     setDeleteDialogOpen(true);
@@ -95,36 +110,117 @@ export default function OwnerMenu() {
     setItemToDelete(null);
   };
   
-  const handleSaveCategory = (data: any) => {
-    // Here you would save the category data
+  // Handlers for category form
+  const handleCategoryChange = (field: string, value: any) => {
+    setCategoryForm({...categoryForm, [field]: value});
+  };
+  
+  const handleSaveCategory = () => {
+    // Validate form
+    if (!categoryForm.name) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Nome da categoria é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Save category (in a real app, this would be an API call)
     toast({
       title: "Categoria salva",
       description: "A categoria foi salva com sucesso.",
     });
+    
+    // Reset form and close dialog
+    setCategoryForm({ name: "", description: "", active: true });
     setIsAddCategoryOpen(false);
   };
   
-  const handleSaveAddon = (data: any) => {
+  // Handlers for addon form
+  const handleAddonChange = (field: string, value: any) => {
+    setAddonForm({...addonForm, [field]: value});
+  };
+  
+  const handleSaveAddon = () => {
+    // Validate form
+    if (!addonForm.name || !addonForm.price) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome e preço são obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "Adicional salvo",
       description: "O adicional foi salvo com sucesso.",
     });
+    
+    // Reset form and close dialog
+    setAddonForm({ name: "", price: "", active: true });
     setIsAddAddonOpen(false);
   };
   
-  const handleSaveLevel = (data: any) => {
+  // Handlers for level form
+  const handleLevelChange = (field: string, value: any) => {
+    setLevelForm({...levelForm, [field]: value});
+  };
+  
+  const handleSaveLevel = () => {
+    // Validate form
+    if (!levelForm.name) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Nome do nível é obrigatório",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (Number(levelForm.min) > Number(levelForm.max)) {
+      toast({
+        title: "Valores inválidos",
+        description: "O mínimo não pode ser maior que o máximo",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "Nível salvo",
       description: "O nível foi salvo com sucesso.",
     });
+    
+    // Reset form and close dialog
+    setLevelForm({ name: "", min: "0", max: "1", active: true });
     setIsAddLevelOpen(false);
   };
   
-  const handleSaveOption = (data: any) => {
+  // Handlers for option form
+  const handleOptionChange = (field: string, value: any) => {
+    setOptionForm({...optionForm, [field]: value});
+  };
+  
+  const handleSaveOption = () => {
+    // Validate form
+    if (!optionForm.name || !optionForm.level) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Nome e nível são obrigatórios",
+        variant: "destructive"
+      });
+      return;
+    }
+    
     toast({
       title: "Opção salva",
       description: "A opção foi salva com sucesso.",
     });
+    
+    // Reset form and close dialog
+    setOptionForm({ name: "", price: "", level: "", active: true });
     setIsAddOptionOpen(false);
   };
 
@@ -170,19 +266,19 @@ export default function OwnerMenu() {
         </TabsList>
 
         <TabsContent value="categories">
-          <CategoryList onEdit={(id) => handleEdit(id, 'category')} onDelete={(id) => handleDelete(id, 'category')} />
+          <CategoryList onDelete={(id) => handleDelete(id, 'category')} />
         </TabsContent>
         
         <TabsContent value="addons">
-          <AddonList onEdit={(id) => handleEdit(id, 'addon')} onDelete={(id) => handleDelete(id, 'addon')} />
+          <AddonList onDelete={(id) => handleDelete(id, 'addon')} />
         </TabsContent>
         
         <TabsContent value="levels">
-          <MenuLevelList onEdit={(id) => handleEdit(id, 'level')} onDelete={(id) => handleDelete(id, 'level')} />
+          <MenuLevelList onDelete={(id) => handleDelete(id, 'level')} />
         </TabsContent>
         
         <TabsContent value="options">
-          <MenuOptionList onEdit={(id) => handleEdit(id, 'option')} onDelete={(id) => handleDelete(id, 'option')} />
+          <MenuOptionList onDelete={(id) => handleDelete(id, 'option')} />
         </TabsContent>
       </Tabs>
 
@@ -200,13 +296,26 @@ export default function OwnerMenu() {
               <Label htmlFor="name" className="text-right">
                 Nome
               </Label>
-              <Input id="name" placeholder="Nome da categoria" className="col-span-3" />
+              <Input 
+                id="name" 
+                placeholder="Nome da categoria" 
+                value={categoryForm.name}
+                onChange={(e) => handleCategoryChange("name", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="description" className="text-right">
                 Descrição
               </Label>
-              <Input id="description" placeholder="Descrição (opcional)" className="col-span-3" />
+              <Textarea 
+                id="description" 
+                placeholder="Descrição (opcional)"
+                value={categoryForm.description}
+                onChange={(e) => handleCategoryChange("description", e.target.value)}
+                className="col-span-3" 
+                rows={3}
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="image" className="text-right">
@@ -219,13 +328,17 @@ export default function OwnerMenu() {
                 Ativo
               </Label>
               <div className="col-span-3 flex items-center">
-                <Switch id="active" defaultChecked />
+                <Switch 
+                  id="active" 
+                  checked={categoryForm.active}
+                  onCheckedChange={(checked) => handleCategoryChange("active", checked)}
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddCategoryOpen(false)}>Cancelar</Button>
-            <Button onClick={() => handleSaveCategory({})}>Salvar</Button>
+            <Button onClick={handleSaveCategory}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -241,29 +354,46 @@ export default function OwnerMenu() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label htmlFor="addon-name" className="text-right">
                 Nome
               </Label>
-              <Input id="name" placeholder="Nome do adicional" className="col-span-3" />
+              <Input 
+                id="addon-name" 
+                placeholder="Nome do adicional" 
+                value={addonForm.name}
+                onChange={(e) => handleAddonChange("name", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">
-                Preço
+              <Label htmlFor="addon-price" className="text-right">
+                Preço (R$)
               </Label>
-              <Input id="price" type="number" placeholder="0.00" className="col-span-3" />
+              <Input 
+                id="addon-price" 
+                type="text" 
+                placeholder="0.00" 
+                value={addonForm.price}
+                onChange={(e) => handleAddonChange("price", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="active" className="text-right">
+              <Label htmlFor="addon-active" className="text-right">
                 Ativo
               </Label>
               <div className="col-span-3 flex items-center">
-                <Switch id="active" defaultChecked />
+                <Switch 
+                  id="addon-active" 
+                  checked={addonForm.active}
+                  onCheckedChange={(checked) => handleAddonChange("active", checked)}
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddAddonOpen(false)}>Cancelar</Button>
-            <Button onClick={() => handleSaveAddon({})}>Salvar</Button>
+            <Button onClick={handleSaveAddon}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -279,35 +409,61 @@ export default function OwnerMenu() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label htmlFor="level-name" className="text-right">
                 Nome
               </Label>
-              <Input id="name" placeholder="Nome do nível" className="col-span-3" />
+              <Input 
+                id="level-name" 
+                placeholder="Nome do nível" 
+                value={levelForm.name}
+                onChange={(e) => handleLevelChange("name", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="min" className="text-right">
+              <Label htmlFor="level-min" className="text-right">
                 Mínimo
               </Label>
-              <Input id="min" type="number" placeholder="0" className="col-span-3" />
+              <Input 
+                id="level-min" 
+                type="number" 
+                min="0"
+                placeholder="0" 
+                value={levelForm.min}
+                onChange={(e) => handleLevelChange("min", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="max" className="text-right">
+              <Label htmlFor="level-max" className="text-right">
                 Máximo
               </Label>
-              <Input id="max" type="number" placeholder="1" className="col-span-3" />
+              <Input 
+                id="level-max" 
+                type="number" 
+                min="1"
+                placeholder="1" 
+                value={levelForm.max}
+                onChange={(e) => handleLevelChange("max", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="active" className="text-right">
+              <Label htmlFor="level-active" className="text-right">
                 Ativo
               </Label>
               <div className="col-span-3 flex items-center">
-                <Switch id="active" defaultChecked />
+                <Switch 
+                  id="level-active" 
+                  checked={levelForm.active}
+                  onCheckedChange={(checked) => handleLevelChange("active", checked)}
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddLevelOpen(false)}>Cancelar</Button>
-            <Button onClick={() => handleSaveLevel({})}>Salvar</Button>
+            <Button onClick={handleSaveLevel}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -323,35 +479,68 @@ export default function OwnerMenu() {
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">
+              <Label htmlFor="option-name" className="text-right">
                 Nome
               </Label>
-              <Input id="name" placeholder="Nome da opção" className="col-span-3" />
+              <Input 
+                id="option-name" 
+                placeholder="Nome da opção"
+                value={optionForm.name}
+                onChange={(e) => handleOptionChange("name", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="price" className="text-right">
-                Preço adicional
+              <Label htmlFor="option-price" className="text-right">
+                Preço adicional (R$)
               </Label>
-              <Input id="price" type="number" placeholder="0.00" className="col-span-3" />
+              <Input 
+                id="option-price" 
+                type="text" 
+                placeholder="0.00" 
+                value={optionForm.price}
+                onChange={(e) => handleOptionChange("price", e.target.value)}
+                className="col-span-3" 
+              />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="level" className="text-right">
+              <Label htmlFor="option-level" className="text-right">
                 Nível
               </Label>
-              <Input id="level" placeholder="Selecione o nível" className="col-span-3" />
+              <div className="col-span-3">
+                <Select
+                  value={optionForm.level}
+                  onValueChange={(value) => handleOptionChange("level", value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o nível" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Proteína">Proteína</SelectItem>
+                    <SelectItem value="Tamanho">Tamanho</SelectItem>
+                    <SelectItem value="Ponto da Carne">Ponto da Carne</SelectItem>
+                    <SelectItem value="Acompanhamentos">Acompanhamentos</SelectItem>
+                    <SelectItem value="Molhos">Molhos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="active" className="text-right">
+              <Label htmlFor="option-active" className="text-right">
                 Ativo
               </Label>
               <div className="col-span-3 flex items-center">
-                <Switch id="active" defaultChecked />
+                <Switch 
+                  id="option-active"
+                  checked={optionForm.active}
+                  onCheckedChange={(checked) => handleOptionChange("active", checked)}
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddOptionOpen(false)}>Cancelar</Button>
-            <Button onClick={() => handleSaveOption({})}>Salvar</Button>
+            <Button onClick={handleSaveOption}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -367,7 +556,7 @@ export default function OwnerMenu() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} variant="destructive">
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white">
               Excluir
             </AlertDialogAction>
           </AlertDialogFooter>
