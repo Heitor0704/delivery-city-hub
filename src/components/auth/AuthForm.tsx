@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 type UserRole = "owner" | "cityManager" | "admin";
 
@@ -25,6 +25,36 @@ export default function AuthForm() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("owner");
   const [isLoading, setIsLoading] = useState(false);
+
+  // New function to create demo users via Supabase Auth
+  const createDemoUser = async (userType: keyof typeof DEMO_USERS) => {
+    const demoUser = DEMO_USERS[userType];
+    setIsLoading(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: demoUser.email,
+        password: demoUser.password,
+        options: {
+          data: {
+            tipo_usuario: demoUser.role
+          }
+        }
+      });
+
+      if (error) {
+        toast.error(`Erro ao criar usuário demo: ${error.message}`);
+        console.error(error);
+      } else {
+        toast.success(`Usuário demo ${userType} criado com sucesso!`);
+      }
+    } catch (error) {
+      toast.error(`Erro inesperado: ${error}`);
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,28 +149,31 @@ export default function AuthForm() {
 
           {/* Demo logins */}
           <div className="mt-6 pt-4 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-2">Demonstração:</p>
+            <p className="text-xs text-gray-500 text-center mb-2">Criar usuários demo:</p>
             <div className="flex justify-between space-x-2">
               <button
                 type="button"
-                onClick={() => fillDemoCredentials("owner")}
+                onClick={() => createDemoUser("owner")}
+                disabled={isLoading}
                 className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
               >
-                Demo Dono
+                Criar Dono
               </button>
               <button
                 type="button"
-                onClick={() => fillDemoCredentials("cityManager")}
+                onClick={() => createDemoUser("cityManager")}
+                disabled={isLoading}
                 className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
               >
-                Demo Gerente
+                Criar Gerente
               </button>
               <button
                 type="button"
-                onClick={() => fillDemoCredentials("admin")}
+                onClick={() => createDemoUser("admin")}
+                disabled={isLoading}
                 className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-gray-700 flex-1"
               >
-                Demo Admin
+                Criar Admin
               </button>
             </div>
           </div>
