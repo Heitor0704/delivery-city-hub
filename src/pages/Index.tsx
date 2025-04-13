@@ -5,14 +5,10 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
-    // Aguardar o carregamento da autenticação
-    if (isLoading) return;
-    
     if (isAuthenticated && user) {
-      console.log("User authenticated, redirecting to appropriate dashboard", user);
       // Se estiver autenticado, redireciona para o dashboard apropriado
       switch (user.role) {
         case "owner":
@@ -25,26 +21,15 @@ const Index = () => {
           navigate('/admin-dashboard', { replace: true });
           break;
         default:
-          console.warn("Unknown user role:", user.role);
           navigate('/', { replace: true });
       }
     } else {
-      console.log("User not authenticated, staying on login page");
-      // Se não estiver autenticado, permanece na página inicial (login)
+      // Se não estiver autenticado, redireciona para a página de login
+      navigate('/', { replace: true });
     }
-  }, [isAuthenticated, user, navigate, isLoading]);
+  }, [isAuthenticated, user, navigate]);
 
-  // Exibir um estado de carregamento enquanto verifica a autenticação
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">Carregando...</div>
-      </div>
-    );
-  }
-
-  // Se não estiver autenticado ou ainda estiver carregando, não faz nada (exibe o login)
-  return null;
+  return null; // Esta página apenas redireciona
 };
 
 export default Index;
