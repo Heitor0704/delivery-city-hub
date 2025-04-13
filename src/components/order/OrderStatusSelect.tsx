@@ -12,6 +12,7 @@ interface OrderStatusSelectProps {
   orderId: string;
   currentStatus: string;
   onStatusChange: (status: string) => void;
+  className?: string; // Added className property as optional
 }
 
 const statusColors: Record<string, string> = {
@@ -30,13 +31,13 @@ const statusLabels: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
-export function OrderStatusSelect({ orderId, currentStatus, onStatusChange }: OrderStatusSelectProps) {
+export function OrderStatusSelect({ orderId, currentStatus, onStatusChange, className }: OrderStatusSelectProps) {
   return (
     <Select
       defaultValue={currentStatus}
       onValueChange={onStatusChange}
     >
-      <SelectTrigger className="w-[130px] border-none p-0">
+      <SelectTrigger className={`w-[130px] border-none p-0 ${className || ""}`}>
         <SelectValue>
           <Badge variant="outline" className={statusColors[currentStatus]}>
             {statusLabels[currentStatus]}
