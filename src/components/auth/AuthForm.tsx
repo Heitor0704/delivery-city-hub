@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,28 +13,25 @@ type UserRole = "owner" | "cityManager" | "admin";
 
 // Demo user credentials for testing
 const DEMO_USERS = {
-  owner: { email: "dono@fomex.com", password: "123456", role: "owner" },
-  cityManager: { email: "gerente@fomex.com", password: "123456", role: "cityManager" },
-  admin: { email: "admin@fomex.com", password: "123456", role: "admin" },
+  owner: { email: "dono@fomex.com", password: "Fomex2025!", role: "owner" },
+  cityManager: { email: "gerente@fomex.com", password: "Fomex2025!", role: "cityManager" },
+  admin: { email: "admin@fomex.com", password: "Fomex2025!", role: "admin" },
 };
 
 export default function AuthForm() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("owner");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       // Validar campos
       if (!email || !password) {
         toast.error("Por favor, preencha todos os campos.");
-        setIsLoading(false);
         return;
       }
 
@@ -43,24 +41,10 @@ export default function AuthForm() {
       // Redirecionar após login bem-sucedido
       toast.success("Login realizado com sucesso!");
       
-      // Redireciona para o dashboard específico do tipo de usuário
-      switch (role) {
-        case "owner":
-          navigate("/owner-dashboard");
-          break;
-        case "cityManager":
-          navigate("/city-manager-dashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        default:
-          navigate("/");
-      }
+      // O redirecionamento acontecerá automaticamente no componente Index.tsx
     } catch (error) {
-      toast.error("Erro ao fazer login: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
-    } finally {
-      setIsLoading(false);
+      console.error("Login error:", error);
+      // Toast already shown in the login function
     }
   };
 
