@@ -1,11 +1,27 @@
 
 import { createContext, useContext, useState, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
+import { Session } from "@supabase/supabase-js";
+// Rename the imported User to SupabaseUser to avoid conflicts
+import { User as SupabaseUser } from "@supabase/supabase-js";
 import { toast } from "sonner";
+
+// Define a type for the database user data structure 
+interface UserData {
+  created_at: string;
+  documento: string | null;
+  email: string | null; 
+  nome_usuario: string | null;
+  senha: string | null; 
+  telefone: string | null;
+  tipo_usuario: string | null;
+  user_id: string;
+  avatar?: string; // Make avatar optional since it's not in the original data
+}
 
 type UserRole = "admin" | "cityManager" | "owner";
 
+// Define our custom User type that will be used throughout the app
 interface User {
   id: string;
   email: string;
@@ -57,12 +73,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             if (userData) {
+              // Create our application User from the database UserData
               const userInfo: User = {
                 id: currentSession.user.id,
                 email: currentSession.user.email || "",
                 name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
                 role: userData.tipo_usuario as UserRole,
-                avatar: userData.avatar,
+                avatar: userData.avatar, // This might be undefined, which is fine
               };
               
               setUser(userInfo);
@@ -103,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: currentSession.user.email || "",
               name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
               role: userData.tipo_usuario as UserRole,
-              avatar: userData.avatar,
+              avatar: userData.avatar, // This might be undefined, which is fine
             };
             
             setUser(userInfo);
