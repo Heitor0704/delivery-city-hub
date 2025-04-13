@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -37,27 +38,13 @@ export default function AuthForm() {
         return;
       }
 
-      // Fazer login
+      // Fazer login usando o Supabase através do nosso contexto de autenticação
       await login(email, password);
       
-      // Redirecionar após login bem-sucedido
+      // Mostrar mensagem de sucesso
       toast.success("Login realizado com sucesso!");
-      
-      // Redireciona para o dashboard específico do tipo de usuário
-      switch (role) {
-        case "owner":
-          navigate("/owner-dashboard");
-          break;
-        case "cityManager":
-          navigate("/city-manager-dashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        default:
-          navigate("/");
-      }
     } catch (error) {
+      console.error("Erro ao fazer login:", error);
       toast.error("Erro ao fazer login: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
     } finally {
       setIsLoading(false);
@@ -109,19 +96,7 @@ export default function AuthForm() {
               required
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-gray-700 font-medium">Tipo de Usuário</Label>
-            <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
-              <SelectTrigger className="border-gray-300 focus:border-orange-500">
-                <SelectValue placeholder="Selecione o tipo de usuário" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="owner">Dono do Estabelecimento</SelectItem>
-                <SelectItem value="cityManager">Gerente da Cidade</SelectItem>
-                <SelectItem value="admin">Dono do Sistema</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+
           <Button 
             type="submit" 
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-md transition"
