@@ -8,7 +8,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Loader2 } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
 
 export function ProfileSettings() {
   const { user, updateUser } = useAuth();
@@ -39,34 +38,17 @@ export function ProfileSettings() {
     setIsLoading(true);
     
     try {
-      // Generate a random avatar if none provided
-      let avatarUrl = avatar;
-      if (!avatarUrl) {
-        // Use DiceBear API for random avatar
-        avatarUrl = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name || user?.email || 'user')}`;
-      }
+      // In a real app, you would upload the file to a server/storage
+      // and get back a URL to set in the user profile
       
-      // Update user profile in Supabase database
-      if (user) {
-        const { error } = await supabase
-          .from('Usuarios')
-          .update({ 
-            nome_usuario: name,
-            avatar: avatarUrl 
-          })
-          .eq('user_id', user.id);
-
-        if (error) {
-          console.error("Erro ao atualizar perfil no banco de dados:", error);
-          throw new Error("Erro ao salvar suas informações no banco de dados");
-        }
-      }
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Update user in context
       updateUser({
         ...user!,
         name,
-        avatar: avatarUrl || undefined,
+        avatar: avatar || undefined,
       });
       
       toast({
@@ -74,10 +56,9 @@ export function ProfileSettings() {
         description: "Suas informações de perfil foram atualizadas com sucesso.",
       });
     } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
       toast({
         title: "Erro ao atualizar",
-        description: error instanceof Error ? error.message : "Ocorreu um erro ao atualizar seu perfil. Tente novamente.",
+        description: "Ocorreu um erro ao atualizar seu perfil. Tente novamente.",
         variant: "destructive",
       });
     } finally {

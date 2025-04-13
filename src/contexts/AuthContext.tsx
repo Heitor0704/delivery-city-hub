@@ -1,25 +1,8 @@
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Session } from "@supabase/supabase-js";
-import { User as SupabaseUser } from "@supabase/supabase-js";
-import { toast } from "sonner";
 
-// Define a type for the database user data structure 
-interface UserData {
-  created_at: string;
-  documento: string | null;
-  email: string | null; 
-  nome_usuario: string | null;
-  senha: string | null; 
-  telefone: string | null;
-  tipo_usuario: string | null;
-  user_id: string;
-  avatar: string | null; // Added the avatar field here
-}
+import { createContext, useContext, useState, ReactNode } from "react";
 
 type UserRole = "admin" | "cityManager" | "owner";
 
-// Define our custom User type that will be used throughout the app
 interface User {
   id: string;
   email: string;
@@ -39,165 +22,49 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Mock authentication state
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
   });
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const isAuthenticated = !!user;
 
-  // Configurar o listener de autenticação do Supabase
-  useEffect(() => {
-    // Configurar o listener de mudança de estado de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event);
-        setSession(currentSession);
-        
-        if (event === 'SIGNED_OUT') {
-          setUser(null);
-          localStorage.removeItem("user");
-          return;
-        }
-        
-        if (currentSession?.user) {
-          try {
-            // Buscar dados do usuário do Supabase
-            const { data: userData, error } = await supabase
-              .from("Usuarios")
-              .select("*")
-              .eq("user_id", currentSession.user.id)
-              .single();
-
-            console.log("Dados do usuário:", userData);
-
-            if (error) {
-              console.error("Erro ao buscar dados do usuário:", error);
-              return;
-            }
-
-            if (userData) {
-              // Create our application User from the database UserData
-              const userInfo: User = {
-                id: currentSession.user.id,
-                email: currentSession.user.email || "",
-                name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
-                role: userData.tipo_usuario as UserRole,
-                avatar: userData.avatar, // Agora o campo avatar está corretamente tipado
-              };
-              
-              console.log("Usuário autenticado:", userInfo);
-              setUser(userInfo);
-              localStorage.setItem("user", JSON.stringify(userInfo));
-            }
-          } catch (error) {
-            console.error("Erro ao processar autenticação:", error);
-          }
-        } else {
-          setUser(null);
-          localStorage.removeItem("user");
-        }
-      }
-    );
-
-    // Verificar sessão atual ao carregar
-    const checkCurrentSession = async () => {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        
-        if (currentSession?.user) {
-          // Buscar dados do usuário do Supabase
-          const { data: userData, error } = await supabase
-            .from("Usuarios")
-            .select("*")
-            .eq("user_id", currentSession.user.id)
-            .single();
-
-          if (error) {
-            console.error("Erro ao buscar dados do usuário:", error);
-            setLoading(false);
-            return;
-          }
-
-          if (userData) {
-            const userInfo: User = {
-              id: currentSession.user.id,
-              email: currentSession.user.email || "",
-              name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
-              role: userData.tipo_usuario as UserRole,
-              avatar: userData.avatar, // Agora o campo avatar está corretamente tipado
-            };
-            
-            console.log("Usuário carregado da sessão:", userInfo);
-            setUser(userInfo);
-            localStorage.setItem("user", JSON.stringify(userInfo));
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkCurrentSession();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
   const login = async (email: string, password: string) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        console.error("Erro de login:", error.message);
-        throw new Error(error.message);
-      }
-
-      if (!data.user) {
-        throw new Error("Não foi possível autenticar o usuário");
-      }
-
-      // A atualização do user state será feita pelo listener onAuthStateChange
-      console.log("Login bem-sucedido para:", email);
-      return;
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      throw error;
+    // Para fins de demonstração, aceitaremos "123456" como senha para todos os usuários
+    // Em produção, isso seria validado no backend
+    if (password !== "123456") {
+      throw new Error("Credenciais inválidas");
     }
+
+    let role: UserRole = "owner";
+    if (email.includes("admin")) {
+      role = "admin";
+    } else if (email.includes("gerente") || email.includes("manager")) {
+      role = "cityManager";
+    }
+
+    const userData: User = {
+      id: "user-1",
+      email,
+      name: "",
+      role,
+    };
+
+    // Set the authenticated user
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  const logout = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error("Erro ao fazer logout:", error);
-        toast.error("Erro ao fazer logout");
-      } else {
-        setUser(null);
-        localStorage.removeItem("user");
-      }
-    } catch (error) {
-      console.error("Erro ao fazer logout:", error);
-      toast.error("Erro ao fazer logout");
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
   };
 
   const updateUser = (userData: User) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
   };
-
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Carregando...</div>;
-  }
 
   return (
     <AuthContext.Provider
