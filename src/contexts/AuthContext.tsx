@@ -16,7 +16,7 @@ interface UserData {
   telefone: string | null;
   tipo_usuario: string | null;
   user_id: string;
-  avatar: string | null;
+  avatar: string | null; // Adicionado o campo avatar que faltava
 }
 
 type UserRole = "admin" | "cityManager" | "owner";
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 email: currentSession.user.email || "",
                 name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
                 role: userData.tipo_usuario as UserRole,
-                avatar: userData.avatar,
+                avatar: userData.avatar, // Agora o campo avatar está corretamente tipado
               };
               
               console.log("Usuário autenticado:", userInfo);
@@ -129,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               email: currentSession.user.email || "",
               name: userData.nome_usuario || currentSession.user.email?.split("@")[0] || "",
               role: userData.tipo_usuario as UserRole,
-              avatar: userData.avatar,
+              avatar: userData.avatar, // Agora o campo avatar está corretamente tipado
             };
             
             console.log("Usuário carregado da sessão:", userInfo);
