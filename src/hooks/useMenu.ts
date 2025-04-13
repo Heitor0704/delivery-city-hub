@@ -139,7 +139,13 @@ export function useMenu() {
     }
   };
 
-  const addLevel = async (levelData: Partial<MenuLevel>): Promise<boolean> => {
+  const addLevel = async (levelData: { 
+    nome: string; 
+    qtd_opcoes_min?: number; 
+    qtd_opcoes_max?: number; 
+    ativo?: boolean; 
+    obrigatorio?: boolean;
+  }): Promise<boolean> => {
     if (!restaurantId) {
       toast.error("Estabelecimento não identificado.");
       return false;
@@ -166,7 +172,12 @@ export function useMenu() {
     }
   };
 
-  const addOption = async (optionData: Partial<MenuOption>): Promise<boolean> => {
+  const addOption = async (optionData: {
+    nome: string;
+    valor?: number;
+    nivel_id: number;
+    ativo?: boolean;
+  }): Promise<boolean> => {
     if (!optionData.nivel_id) {
       toast.error("Nível não especificado.");
       return false;

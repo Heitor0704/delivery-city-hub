@@ -23,6 +23,7 @@ export interface MenuLevel {
   qtd_opcoes_max: number;
   ativo: boolean;
   obrigatorio: boolean;
+  estabelecimento_id: number; // Added this required field
 }
 
 export interface MenuOption {
@@ -109,7 +110,14 @@ export async function getMenuLevels(restaurantId: number): Promise<MenuLevel[]> 
   return data || [];
 }
 
-export async function createMenuLevel(level: Partial<MenuLevel>): Promise<MenuLevel | null> {
+export async function createMenuLevel(level: { 
+  nome: string; 
+  qtd_opcoes_min?: number; 
+  qtd_opcoes_max?: number; 
+  ativo?: boolean; 
+  obrigatorio?: boolean;
+  estabelecimento_id: number;
+}): Promise<MenuLevel | null> {
   const { data, error } = await supabase
     .from("Nivel Cardapio")
     .insert([level])
@@ -140,7 +148,12 @@ export async function getMenuOptions(levelId: number): Promise<MenuOption[]> {
   return data || [];
 }
 
-export async function createMenuOption(option: Partial<MenuOption>): Promise<MenuOption | null> {
+export async function createMenuOption(option: { 
+  nome: string; 
+  valor?: number;
+  nivel_id: number;
+  ativo?: boolean;
+}): Promise<MenuOption | null> {
   const { data, error } = await supabase
     .from("Opcao Cardapio")
     .insert([option])
