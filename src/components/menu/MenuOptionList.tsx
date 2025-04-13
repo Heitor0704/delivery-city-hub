@@ -1,234 +1,153 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, AlertCircle, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { useMenu } from "@/hooks/useMenu";
+import { formatCurrency } from "@/lib/formatters";
 
-const initialOptions = [
-  { id: 1, nome: "Picanha", preco: "R$ 5,00", nivel: "Proteína", ativo: true },
-  { id: 2, nome: "Filé Mignon", preco: "R$ 7,00", nivel: "Proteína", ativo: true },
-  { id: 3, nome: "Pequeno", preco: "R$ 0,00", nivel: "Tamanho", ativo: true },
-  { id: 4, nome: "Médio", preco: "R$ 3,00", nivel: "Tamanho", ativo: true },
-  { id: 5, nome: "Grande", preco: "R$ 5,00", nivel: "Tamanho", ativo: false },
-];
+export function MenuOptionList({ onDelete }: { onDelete: (id: string) => void }) {
+  const { levels, options, isLoading } = useMenu();
+  const [selectedLevel, setSelectedLevel] = useState<string>("");
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-const availableLevels = [
-  "Proteína",
-  "Tamanho",
-  "Ponto da Carne",
-  "Acompanhamentos",
-  "Molhos"
-];
-
-interface OptionEditFormProps {
-  option: any;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (option: any) => void;
-}
-
-function OptionEditForm({ option, open, onOpenChange, onSave }: OptionEditFormProps) {
-  const [editedOption, setEditedOption] = useState({...option});
-  const { toast } = useToast();
-  
-  const handleChange = (field: string, value: any) => {
-    setEditedOption({...editedOption, [field]: value});
+  const handleDelete = (id: number) => {
+    setDeletingId(id);
+    // Aqui viria a lógica para excluir a opção
+    setTimeout(() => {
+      onDelete(id.toString());
+      setDeletingId(null);
+    }, 500);
   };
-  
-  const handleSubmit = () => {
-    if (!editedOption.nome) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Nome da opção é obrigatório",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    onSave(editedOption);
-    onOpenChange(false);
-  };
-  
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Editar Opção</DialogTitle>
-          <DialogDescription>
-            Edite os detalhes da opção {option.nome}.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nome
-            </Label>
-            <Input 
-              id="name" 
-              value={editedOption.nome} 
-              onChange={(e) => handleChange("nome", e.target.value)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="price" className="text-right">
-              Preço
-            </Label>
-            <Input 
-              id="price" 
-              value={editedOption.preco.replace("R$ ", "")} 
-              onChange={(e) => handleChange("preco", `R$ ${e.target.value}`)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="level" className="text-right">
-              Nível
-            </Label>
-            <div className="col-span-3">
-              <Select
-                value={editedOption.nivel}
-                onValueChange={(value) => handleChange("nivel", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableLevels.map(level => (
-                    <SelectItem key={level} value={level}>{level}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="active" className="text-right">
-              Ativo
-            </Label>
-            <div className="col-span-3 flex items-center">
-              <Switch 
-                id="active" 
-                checked={editedOption.ativo} 
-                onCheckedChange={(checked) => handleChange("ativo", checked)} 
-              />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Salvar</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
-interface MenuOptionListProps {
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-}
+  const currentLevelOptions = selectedLevel 
+    ? options[parseInt(selectedLevel)] || [] 
+    : [];
 
-export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
-  const [options, setOptions] = useState(initialOptions);
-  const [editingOption, setEditingOption] = useState<any>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { toast } = useToast();
-  
-  const handleEdit = (id: string | number) => {
-    const option = options.find(item => item.id.toString() === id.toString());
-    if (option) {
-      setEditingOption(option);
-      setIsEditDialogOpen(true);
-    }
-  };
-  
-  const handleSaveEdit = (updatedOption: any) => {
-    const updatedOptions = options.map(item => 
-      item.id === updatedOption.id ? updatedOption : item
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
-    setOptions(updatedOptions);
-    
-    toast({
-      title: "Opção atualizada",
-      description: `A opção '${updatedOption.nome}' foi atualizada com sucesso.`
-    });
-  };
+  }
 
-  return (
-    <>
+  if (levels.length === 0) {
+    return (
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Preço</TableHead>
-                <TableHead>Nível</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {options.map((option) => (
-                <TableRow key={option.id}>
-                  <TableCell className="font-medium">{option.nome}</TableCell>
-                  <TableCell>{option.preco}</TableCell>
-                  <TableCell>{option.nivel}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      option.ativo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                    }`}>
-                      {option.ativo ? "Ativo" : "Inativo"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => handleEdit(option.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="text-destructive"
-                        onClick={() => onDelete && onDelete(option.id.toString())}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="flex flex-col items-center justify-center p-6">
+          <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
+          <p className="text-muted-foreground text-center">Nenhum nível encontrado.</p>
+          <p className="text-sm text-muted-foreground text-center mt-1">
+            Adicione um nível primeiro para depois criar opções.
+          </p>
         </CardContent>
       </Card>
-      
-      {editingOption && (
-        <OptionEditForm 
-          option={editingOption} 
-          open={isEditDialogOpen} 
-          onOpenChange={setIsEditDialogOpen}
-          onSave={handleSaveEdit}
-        />
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Select
+          value={selectedLevel}
+          onValueChange={setSelectedLevel}
+        >
+          <SelectTrigger className="w-full sm:w-[300px]">
+            <SelectValue placeholder="Selecione um nível" />
+          </SelectTrigger>
+          <SelectContent>
+            {levels.map((level) => (
+              <SelectItem key={level.id} value={level.id.toString()}>
+                {level.nome}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {selectedLevel ? (
+        currentLevelOptions.length > 0 ? (
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Valor</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {currentLevelOptions.map((option) => (
+                    <TableRow key={option.id}>
+                      <TableCell className="font-medium">{option.nome}</TableCell>
+                      <TableCell>{option.valor > 0 ? formatCurrency(option.valor) : "Grátis"}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <span
+                            className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                              option.ativo ? "bg-green-500" : "bg-gray-300"
+                            }`}
+                          />
+                          {option.ativo ? "Ativo" : "Inativo"}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button variant="outline" size="icon">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            className="text-destructive"
+                            onClick={() => handleDelete(option.id)}
+                            disabled={deletingId === option.id}
+                          >
+                            {deletingId === option.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center p-6">
+              <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
+              <p className="text-muted-foreground text-center">Nenhuma opção encontrada para este nível.</p>
+              <p className="text-sm text-muted-foreground text-center mt-1">
+                Adicione uma nova opção para começar.
+              </p>
+            </CardContent>
+          </Card>
+        )
+      ) : (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center p-6">
+            <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
+            <p className="text-muted-foreground text-center">Selecione um nível para ver suas opções.</p>
+          </CardContent>
+        </Card>
       )}
-    </>
+    </div>
   );
 }

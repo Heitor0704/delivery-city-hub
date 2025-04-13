@@ -1,213 +1,103 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { useMenu } from "@/hooks/useMenu";
 
-const initialCategories = [
-  { id: 1, nome: "Hambúrgueres", descricao: "Hambúrgueres artesanais", imagem: "burger.jpg", ativo: true },
-  { id: 2, nome: "Pizzas", descricao: "Pizzas tradicionais e premium", imagem: "pizza.jpg", ativo: true },
-  { id: 3, nome: "Bebidas", descricao: "Refrigerantes, sucos e bebidas alcoólicas", imagem: "drinks.jpg", ativo: true },
-  { id: 4, nome: "Sobremesas", descricao: "Doces e sobremesas", imagem: "dessert.jpg", ativo: true },
-  { id: 5, nome: "Combos", descricao: "Combos promocionais", imagem: "combo.jpg", ativo: false },
-];
+export function CategoryList({ onDelete }: { onDelete: (id: string) => void }) {
+  const { categories, isLoading, removeCategory } = useMenu();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-interface CategoryEditFormProps {
-  category: any;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (category: any) => void;
-}
-
-function CategoryEditForm({ category, open, onOpenChange, onSave }: CategoryEditFormProps) {
-  const [editedCategory, setEditedCategory] = useState({...category});
-  const { toast } = useToast();
-  
-  const handleChange = (field: string, value: any) => {
-    setEditedCategory({...editedCategory, [field]: value});
-  };
-  
-  const handleSubmit = () => {
-    if (!editedCategory.nome) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Nome da categoria é obrigatório",
-        variant: "destructive"
-      });
-      return;
+  const handleDelete = async (id: number) => {
+    setDeletingId(id);
+    const success = await removeCategory(id);
+    if (success) {
+      onDelete(id.toString());
     }
-    
-    onSave(editedCategory);
-    onOpenChange(false);
+    setDeletingId(null);
   };
-  
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Editar Categoria</DialogTitle>
-          <DialogDescription>
-            Edite os detalhes da categoria {category.nome}.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nome
-            </Label>
-            <Input 
-              id="name" 
-              value={editedCategory.nome} 
-              onChange={(e) => handleChange("nome", e.target.value)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">
-              Descrição
-            </Label>
-            <Input 
-              id="description" 
-              value={editedCategory.descricao} 
-              onChange={(e) => handleChange("descricao", e.target.value)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="image" className="text-right">
-              Imagem
-            </Label>
-            <Input 
-              id="image" 
-              type="file" 
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="active" className="text-right">
-              Ativo
-            </Label>
-            <div className="col-span-3 flex items-center">
-              <Switch 
-                id="active" 
-                checked={editedCategory.ativo} 
-                onCheckedChange={(checked) => handleChange("ativo", checked)} 
-              />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Salvar</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
-interface CategoryListProps {
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-}
-
-export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
-  const [categories, setCategories] = useState(initialCategories);
-  const [editingCategory, setEditingCategory] = useState<any>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { toast } = useToast();
-  
-  const handleEdit = (id: string | number) => {
-    const category = categories.find(cat => cat.id.toString() === id.toString());
-    if (category) {
-      setEditingCategory(category);
-      setIsEditDialogOpen(true);
-    }
-  };
-  
-  const handleSaveEdit = (updatedCategory: any) => {
-    const updatedCategories = categories.map(cat => 
-      cat.id === updatedCategory.id ? updatedCategory : cat
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
-    setCategories(updatedCategories);
-    
-    toast({
-      title: "Categoria atualizada",
-      description: `A categoria '${updatedCategory.nome}' foi atualizada com sucesso.`
-    });
-  };
+  }
 
-  return (
-    <>
+  if (categories.length === 0) {
+    return (
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Descrição</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {categories.map((category) => (
-                <TableRow key={category.id}>
-                  <TableCell className="font-medium">{category.nome}</TableCell>
-                  <TableCell>{category.descricao}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      category.ativo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                    }`}>
-                      {category.ativo ? "Ativo" : "Inativo"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => handleEdit(category.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="text-destructive"
-                        onClick={() => onDelete && onDelete(category.id.toString())}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="flex flex-col items-center justify-center p-6">
+          <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
+          <p className="text-muted-foreground text-center">Nenhuma categoria encontrada.</p>
+          <p className="text-sm text-muted-foreground text-center mt-1">
+            Adicione uma nova categoria para começar.
+          </p>
         </CardContent>
       </Card>
-      
-      {editingCategory && (
-        <CategoryEditForm 
-          category={editingCategory} 
-          open={isEditDialogOpen} 
-          onOpenChange={setIsEditDialogOpen}
-          onSave={handleSaveEdit}
-        />
-      )}
-    </>
+    );
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {categories.map((category) => (
+              <TableRow key={category.id}>
+                <TableCell className="font-medium">{category.categoria}</TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <span
+                      className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                        category.ativo ? "bg-green-500" : "bg-gray-300"
+                      }`}
+                    />
+                    {category.ativo ? "Ativo" : "Inativo"}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="icon">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="text-destructive"
+                      onClick={() => handleDelete(category.id)}
+                      disabled={deletingId === category.id}
+                    >
+                      {deletingId === category.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }

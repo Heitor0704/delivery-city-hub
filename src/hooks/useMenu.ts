@@ -7,6 +7,7 @@ import {
   Category,
   MenuLevel,
   MenuOption,
+  Product,
   getCategories,
   createCategory,
   updateCategory,
@@ -14,7 +15,13 @@ import {
   getMenuLevels,
   createMenuLevel,
   getMenuOptions,
-  createMenuOption
+  createMenuOption,
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  toggleProductAvailability,
+  toggleProductFeatured
 } from "@/services/menuService";
 
 export function useMenu() {
@@ -23,6 +30,7 @@ export function useMenu() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [levels, setLevels] = useState<MenuLevel[]>([]);
   const [options, setOptions] = useState<Record<number, MenuOption[]>>({});
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -51,13 +59,15 @@ export function useMenu() {
   const loadMenuData = async (restaurantId: number) => {
     setIsLoading(true);
     try {
-      const [categoriesData, levelsData] = await Promise.all([
+      const [categoriesData, levelsData, productsData] = await Promise.all([
         getCategories(restaurantId),
-        getMenuLevels(restaurantId)
+        getMenuLevels(restaurantId),
+        getProducts(restaurantId)
       ]);
       
       setCategories(categoriesData);
       setLevels(levelsData);
+      setProducts(productsData);
       
       // Carregar opções para cada nível
       const optionsMap: Record<number, MenuOption[]> = {};
@@ -203,6 +213,112 @@ export function useMenu() {
     }
   };
 
+  const addProduct = async (productData: Partial<Product>): Promise<boolean> => {
+    if (!restaurantId) {
+      toast.error("Estabelecimento não identificado.");
+      return false;
+    }
+    
+    try {
+      const newProduct = await createProduct({
+        ...productData,
+        estabelecimento_id: restaurantId
+      });
+      
+      if (newProduct) {
+        setProducts(prev => [...prev, newProduct]);
+        toast.success("Produto adicionado com sucesso!");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Erro ao adicionar produto:", error);
+      toast.error("Erro ao adicionar produto.");
+      return false;
+    }
+  };
+
+  const updateProductItem = async (id: number, productData: Partial<Product>): Promise<boolean> => {
+    try {
+      const updatedProduct = await updateProduct(id, productData);
+      
+      if (updatedProduct) {
+        setProducts(prev => prev.map(prod => prod.id === id ? updatedProduct : prod));
+        toast.success("Produto atualizado com sucesso!");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Erro ao atualizar produto:", error);
+      toast.error("Erro ao atualizar produto.");
+      return false;
+    }
+  };
+
+  const removeProduct = async (id: number): Promise<boolean> => {
+    try {
+      const success = await deleteProduct(id);
+      
+      if (success) {
+        setProducts(prev => prev.filter(prod => prod.id !== id));
+        toast.success("Produto excluído com sucesso!");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Erro ao excluir produto:", error);
+      toast.error("Erro ao excluir produto.");
+      return false;
+    }
+  };
+
+  const toggleProductStatus = async (id: number, isAvailable: boolean): Promise<boolean> => {
+    try {
+      const success = await toggleProductAvailability(id, isAvailable);
+      
+      if (success) {
+        setProducts(prev => prev.map(prod => 
+          prod.id === id 
+            ? { ...prod, status: isAvailable ? "disponível" : "indisponível" } 
+            : prod
+        ));
+        toast.success("Status do produto atualizado com sucesso!");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Erro ao atualizar status do produto:", error);
+      toast.error("Erro ao atualizar status do produto.");
+      return false;
+    }
+  };
+
+  const toggleProductHighlight = async (id: number, isFeatured: boolean): Promise<boolean> => {
+    try {
+      const success = await toggleProductFeatured(id, isFeatured);
+      
+      if (success) {
+        setProducts(prev => prev.map(prod => 
+          prod.id === id 
+            ? { ...prod, destaque: isFeatured } 
+            : prod
+        ));
+        toast.success("Destaque do produto atualizado com sucesso!");
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error("Erro ao atualizar destaque do produto:", error);
+      toast.error("Erro ao atualizar destaque do produto.");
+      return false;
+    }
+  };
+
   // Recarregar todos os dados
   const refreshData = async () => {
     if (restaurantId) {
@@ -215,12 +331,18 @@ export function useMenu() {
     categories,
     levels,
     options,
+    products,
     isLoading,
     addCategory,
     updateCategoryItem,
     removeCategory,
     addLevel,
     addOption,
+    addProduct,
+    updateProductItem,
+    removeProduct,
+    toggleProductStatus,
+    toggleProductHighlight,
     refreshData
   };
 }

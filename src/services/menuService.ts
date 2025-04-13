@@ -23,7 +23,7 @@ export interface MenuLevel {
   qtd_opcoes_max: number;
   ativo: boolean;
   obrigatorio: boolean;
-  estabelecimento_id: number; // Added this required field
+  estabelecimento_id: number;
 }
 
 export interface MenuOption {
@@ -94,7 +94,6 @@ export async function deleteCategory(id: number): Promise<boolean> {
   return true;
 }
 
-// Implementar métodos para os níveis de menu
 export async function getMenuLevels(restaurantId: number): Promise<MenuLevel[]> {
   const { data, error } = await supabase
     .from("Nivel Cardapio")
@@ -132,7 +131,6 @@ export async function createMenuLevel(level: {
   return data;
 }
 
-// Implementar métodos para opções de menu
 export async function getMenuOptions(levelId: number): Promise<MenuOption[]> {
   const { data, error } = await supabase
     .from("Opcao Cardapio")
@@ -166,4 +164,106 @@ export async function createMenuOption(option: {
   }
 
   return data;
+}
+
+// Products
+export interface Product {
+  id: number;
+  nome_produto: string;
+  descricao: string;
+  preco: number;
+  foto: string;
+  categoria_id: number;
+  estabelecimento_id: number;
+  destaque: boolean;
+  status: string;
+  created_at: string;
+}
+
+export async function getProducts(restaurantId: number): Promise<Product[]> {
+  const { data, error } = await supabase
+    .from("Produto")
+    .select("*")
+    .eq("estabelecimento_id", restaurantId)
+    .order("nome_produto");
+
+  if (error) {
+    console.error("Erro ao buscar produtos:", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+export async function createProduct(product: Partial<Product>): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("Produto")
+    .insert([product])
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao criar produto:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateProduct(id: number, product: Partial<Product>): Promise<Product | null> {
+  const { data, error } = await supabase
+    .from("Produto")
+    .update(product)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) {
+    console.error("Erro ao atualizar produto:", error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function deleteProduct(id: number): Promise<boolean> {
+  const { error } = await supabase
+    .from("Produto")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Erro ao excluir produto:", error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function toggleProductAvailability(id: number, isAvailable: boolean): Promise<boolean> {
+  const { error } = await supabase
+    .from("Produto")
+    .update({ status: isAvailable ? "disponível" : "indisponível" })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Erro ao atualizar disponibilidade do produto:", error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function toggleProductFeatured(id: number, isFeatured: boolean): Promise<boolean> {
+  const { error } = await supabase
+    .from("Produto")
+    .update({ destaque: isFeatured })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Erro ao atualizar destaque do produto:", error);
+    return false;
+  }
+
+  return true;
 }

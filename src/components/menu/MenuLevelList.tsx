@@ -1,229 +1,109 @@
 
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { useMenu } from "@/hooks/useMenu";
 
-const initialLevels = [
-  { id: 1, nome: "Proteína", minimo: 1, maximo: 1, ativo: true },
-  { id: 2, nome: "Tamanho", minimo: 1, maximo: 1, ativo: true },
-  { id: 3, nome: "Ponto da Carne", minimo: 0, maximo: 1, ativo: true },
-  { id: 4, nome: "Acompanhamentos", minimo: 0, maximo: 3, ativo: true },
-  { id: 5, nome: "Molhos", minimo: 0, maximo: 2, ativo: false },
-];
+export function MenuLevelList({ onDelete }: { onDelete: (id: string) => void }) {
+  const { levels, isLoading } = useMenu();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
-interface LevelEditFormProps {
-  level: any;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (level: any) => void;
-}
-
-function LevelEditForm({ level, open, onOpenChange, onSave }: LevelEditFormProps) {
-  const [editedLevel, setEditedLevel] = useState({...level});
-  const { toast } = useToast();
-  
-  const handleChange = (field: string, value: any) => {
-    setEditedLevel({...editedLevel, [field]: value});
+  const handleDelete = (id: number) => {
+    setDeletingId(id);
+    // Aqui viria a lógica para excluir o nível
+    setTimeout(() => {
+      onDelete(id.toString());
+      setDeletingId(null);
+    }, 500);
   };
-  
-  const handleSubmit = () => {
-    if (!editedLevel.nome) {
-      toast({
-        title: "Campo obrigatório",
-        description: "Nome do nível é obrigatório",
-        variant: "destructive"
-      });
-      return;
-    }
 
-    if (editedLevel.minimo > editedLevel.maximo) {
-      toast({
-        title: "Valores inválidos",
-        description: "O valor mínimo não pode ser maior que o máximo",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    onSave(editedLevel);
-    onOpenChange(false);
-  };
-  
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Editar Nível</DialogTitle>
-          <DialogDescription>
-            Edite os detalhes do nível {level.nome}.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nome
-            </Label>
-            <Input 
-              id="name" 
-              value={editedLevel.nome} 
-              onChange={(e) => handleChange("nome", e.target.value)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="min" className="text-right">
-              Mínimo
-            </Label>
-            <Input 
-              id="min" 
-              type="number" 
-              min="0"
-              value={editedLevel.minimo} 
-              onChange={(e) => handleChange("minimo", parseInt(e.target.value, 10) || 0)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="max" className="text-right">
-              Máximo
-            </Label>
-            <Input 
-              id="max" 
-              type="number"
-              min="0" 
-              value={editedLevel.maximo} 
-              onChange={(e) => handleChange("maximo", parseInt(e.target.value, 10) || 1)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="active" className="text-right">
-              Ativo
-            </Label>
-            <div className="col-span-3 flex items-center">
-              <Switch 
-                id="active" 
-                checked={editedLevel.ativo} 
-                onCheckedChange={(checked) => handleChange("ativo", checked)} 
-              />
-            </div>
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={handleSubmit}>Salvar</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-interface MenuLevelListProps {
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => void;
-}
-
-export function MenuLevelList({ onEdit, onDelete }: MenuLevelListProps) {
-  const [levels, setLevels] = useState(initialLevels);
-  const [editingLevel, setEditingLevel] = useState<any>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { toast } = useToast();
-  
-  const handleEdit = (id: string | number) => {
-    const level = levels.find(item => item.id.toString() === id.toString());
-    if (level) {
-      setEditingLevel(level);
-      setIsEditDialogOpen(true);
-    }
-  };
-  
-  const handleSaveEdit = (updatedLevel: any) => {
-    const updatedLevels = levels.map(item => 
-      item.id === updatedLevel.id ? updatedLevel : item
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
     );
-    setLevels(updatedLevels);
-    
-    toast({
-      title: "Nível atualizado",
-      description: `O nível '${updatedLevel.nome}' foi atualizado com sucesso.`
-    });
-  };
+  }
 
-  return (
-    <>
+  if (levels.length === 0) {
+    return (
       <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nome</TableHead>
-                <TableHead>Mínimo</TableHead>
-                <TableHead>Máximo</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {levels.map((level) => (
-                <TableRow key={level.id}>
-                  <TableCell className="font-medium">{level.nome}</TableCell>
-                  <TableCell>{level.minimo}</TableCell>
-                  <TableCell>{level.maximo}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs ${
-                      level.ativo ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                    }`}>
-                      {level.ativo ? "Ativo" : "Inativo"}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="icon"
-                        onClick={() => handleEdit(level.id)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        className="text-destructive"
-                        onClick={() => onDelete && onDelete(level.id.toString())}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardContent className="flex flex-col items-center justify-center p-6">
+          <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
+          <p className="text-muted-foreground text-center">Nenhum nível encontrado.</p>
+          <p className="text-sm text-muted-foreground text-center mt-1">
+            Adicione um novo nível para começar.
+          </p>
         </CardContent>
       </Card>
-      
-      {editingLevel && (
-        <LevelEditForm 
-          level={editingLevel} 
-          open={isEditDialogOpen} 
-          onOpenChange={setIsEditDialogOpen}
-          onSave={handleSaveEdit}
-        />
-      )}
-    </>
+    );
+  }
+
+  return (
+    <Card>
+      <CardContent className="p-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Nome</TableHead>
+              <TableHead>Opções (min/max)</TableHead>
+              <TableHead>Obrigatório</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {levels.map((level) => (
+              <TableRow key={level.id}>
+                <TableCell className="font-medium">{level.nome}</TableCell>
+                <TableCell>
+                  {level.qtd_opcoes_min} / {level.qtd_opcoes_max}
+                </TableCell>
+                <TableCell>{level.obrigatorio ? "Sim" : "Não"}</TableCell>
+                <TableCell>
+                  <div className="flex items-center">
+                    <span
+                      className={`inline-block h-2 w-2 rounded-full mr-2 ${
+                        level.ativo ? "bg-green-500" : "bg-gray-300"
+                      }`}
+                    />
+                    {level.ativo ? "Ativo" : "Inativo"}
+                  </div>
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="icon">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="text-destructive"
+                      onClick={() => handleDelete(level.id)}
+                      disabled={deletingId === level.id}
+                    >
+                      {deletingId === level.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 }
