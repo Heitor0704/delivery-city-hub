@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 type UserRole = "owner" | "cityManager" | "admin";
 
@@ -19,21 +21,18 @@ const DEMO_USERS = {
 
 export default function AuthForm() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("owner");
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
 
     try {
       // Validar campos
       if (!email || !password) {
         toast.error("Por favor, preencha todos os campos.");
-        setIsLoading(false);
         return;
       }
 
@@ -43,24 +42,10 @@ export default function AuthForm() {
       // Redirecionar após login bem-sucedido
       toast.success("Login realizado com sucesso!");
       
-      // Redireciona para o dashboard específico do tipo de usuário
-      switch (role) {
-        case "owner":
-          navigate("/owner-dashboard");
-          break;
-        case "cityManager":
-          navigate("/city-manager-dashboard");
-          break;
-        case "admin":
-          navigate("/admin-dashboard");
-          break;
-        default:
-          navigate("/");
-      }
+      // Ao fazer login, a redireção acontecerá automaticamente pelo Index.tsx
+      navigate("/");
     } catch (error) {
       toast.error("Erro ao fazer login: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -127,7 +112,12 @@ export default function AuthForm() {
             className="w-full bg-orange-600 hover:bg-orange-700 text-white font-medium py-2 rounded-md transition"
             disabled={isLoading}
           >
-            {isLoading ? "Entrando..." : "ENTRAR"}
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Entrando...
+              </>
+            ) : "ENTRAR"}
           </Button>
           <div className="flex justify-center mt-4">
             <button 
