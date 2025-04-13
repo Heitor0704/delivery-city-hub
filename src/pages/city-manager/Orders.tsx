@@ -234,14 +234,14 @@ export default function CityManagerOrders() {
                       </TableCell>
                       <TableCell>
                         <Select
-                          defaultValue={order.entregador || ""}
+                          defaultValue={order.entregador || undefined}
                           onValueChange={(value) => handleDelivererAssign(order.id, value)}
                         >
                           <SelectTrigger className="w-[140px]">
                             <SelectValue placeholder="Atribuir" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="">Selecionar...</SelectItem>
+                            <SelectItem value="selecionar" disabled>Selecionar...</SelectItem>
                             {deliverers.map((deliverer) => (
                               <SelectItem key={deliverer.id} value={deliverer.nome}>
                                 {deliverer.nome}
