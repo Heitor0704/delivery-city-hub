@@ -1,6 +1,5 @@
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 type UserRole = "admin" | "cityManager" | "owner";
 
@@ -10,18 +9,6 @@ interface User {
   name?: string;
   role: UserRole;
   avatar?: string;
-}
-
-interface UserData {
-  created_at: string;
-  documento: string;
-  email: string;
-  nome_usuario: string;
-  senha: string;
-  telefone: string;
-  tipo_usuario: string;
-  user_id: string;
-  avatar?: string; // Propriedade avatar definida corretamente
 }
 
 interface AuthContextType {
@@ -35,121 +22,41 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [isAuthenticating, setIsAuthenticating] = useState(true);
+  // Mock authentication state
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  useEffect(() => {
-    // Verificar se já existe uma sessão ativa
-    const checkSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session) {
-        const { user: supabaseUser } = data.session;
-        
-        // Buscar dados do usuário na tabela Usuarios
-        const { data: userData } = await supabase
-          .from('Usuarios')
-          .select('*')
-          .eq('user_id', supabaseUser.id)
-          .single();
-          
-        if (userData) {
-          setUser({
-            id: supabaseUser.id,
-            email: supabaseUser.email || '',
-            name: userData.nome_usuario || '',
-            role: mapUserRole(userData.tipo_usuario),
-            avatar: userData.avatar || undefined
-          });
-        }
-      }
-      
-      setIsAuthenticating(false);
-    };
-    
-    checkSession();
-    
-    // Inscrever-se nas mudanças de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session && session.user) {
-        const { data: userData } = await supabase
-          .from('Usuarios')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (userData) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            name: userData.nome_usuario || '',
-            role: mapUserRole(userData.tipo_usuario),
-            avatar: userData.avatar || undefined
-          });
-        }
-      } else {
-        setUser(null);
-      }
-    });
-    
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Mapear tipo_usuario para role
-  const mapUserRole = (tipo_usuario: string): UserRole => {
-    switch (tipo_usuario) {
-      case "admin":
-        return "admin";
-      case "gerente":
-        return "cityManager";
-      default:
-        return "owner";
-    }
-  };
+  const isAuthenticated = !!user;
 
   const login = async (email: string, password: string) => {
-    setIsAuthenticating(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (data.user) {
-        // Buscar dados do usuário na tabela Usuarios
-        const { data: userData } = await supabase
-          .from('Usuarios')
-          .select('*')
-          .eq('user_id', data.user.id)
-          .single();
-          
-        if (userData) {
-          setUser({
-            id: data.user.id,
-            email: data.user.email || '',
-            name: userData.nome_usuario || '',
-            role: mapUserRole(userData.tipo_usuario),
-            avatar: userData.avatar || undefined
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      throw error;
-    } finally {
-      setIsAuthenticating(false);
+    // Para fins de demonstração, aceitaremos "123456" como senha para todos os usuários
+    // Em produção, isso seria validado no backend
+    if (password !== "123456") {
+      throw new Error("Credenciais inválidas");
     }
+
+    let role: UserRole = "owner";
+    if (email.includes("admin")) {
+      role = "admin";
+    } else if (email.includes("gerente") || email.includes("manager")) {
+      role = "cityManager";
+    }
+
+    const userData: User = {
+      id: "user-1",
+      email,
+      name: "",
+      role,
+    };
+
+    // Set the authenticated user
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  const logout = async () => {
-    await supabase.auth.signOut();
+  const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
   };
@@ -158,8 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
   };
-
-  const isAuthenticated = !!user;
 
   return (
     <AuthContext.Provider

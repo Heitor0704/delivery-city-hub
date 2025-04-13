@@ -715,7 +715,10 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      delete_all_auth_users: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
