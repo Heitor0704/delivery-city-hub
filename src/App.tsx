@@ -74,6 +74,27 @@ const DashboardRedirect = () => {
   }
 };
 
+const Root = () => {
+  const { isAuthenticated, user } = useAuth();
+  
+  // Redireciona automaticamente para o dashboard adequado se já estiver autenticado
+  if (isAuthenticated && user) {
+    switch (user.role) {
+      case "owner":
+        return <Navigate to="/owner-dashboard" replace />;
+      case "cityManager":
+        return <Navigate to="/city-manager-dashboard" replace />;
+      case "admin":
+        return <Navigate to="/admin-dashboard" replace />;
+      default:
+        return <Navigate to="/" replace />;
+    }
+  }
+  
+  // Renderiza a página de login se não estiver autenticado
+  return <LoginPage />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -83,7 +104,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Rotas públicas */}
-            <Route path="/" element={<LoginPage />} />
+            <Route path="/" element={<Root />} />
             <Route path="/logout" element={<LogoutPage />} />
             
             {/* Rota pública para criação de usuários de teste */}

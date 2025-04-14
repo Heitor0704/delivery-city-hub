@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthForm() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -29,8 +29,7 @@ export default function AuthForm() {
       await login(email, password);
       toast.success("Login realizado com sucesso!");
       
-      // Redirect will be handled by the Index component via useEffect that monitors auth state
-      console.log("Login successful, navigation will be handled by Index component");
+      // Redirecionar para o dashboard apropriado diretamente
       navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error("Login form error:", error);
