@@ -22,6 +22,7 @@ interface LevelFormData {
   max: string;
   active: boolean;
   order?: string;
+  isAddon?: boolean;
 }
 
 interface LevelDialogProps {
@@ -45,7 +46,8 @@ export function LevelDialog({
       min: "0",
       max: "1",
       active: true,
-      order: "1"
+      order: "1",
+      isAddon: false
     }
   );
 
@@ -80,7 +82,7 @@ export function LevelDialog({
     
     // Reset form if not in edit mode
     if (!editMode) {
-      setLevelForm({ name: "", min: "0", max: "1", active: true, order: "1" });
+      setLevelForm({ name: "", min: "0", max: "1", active: true, order: "1", isAddon: false });
     }
   };
 
@@ -112,6 +114,24 @@ export function LevelDialog({
               value={levelForm.name}
               onChange={(e) => handleLevelChange("name", e.target.value)}
             />
+          </div>
+          
+          <div className="grid grid-cols-1 gap-3">
+            <Label className="font-medium text-gray-700">Tipo de nível:</Label>
+            <RadioGroup
+              value={levelForm.isAddon ? "addon" : "regular"}
+              onValueChange={(value) => handleLevelChange("isAddon", value === "addon")}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="regular" id="type-regular" />
+                <Label htmlFor="type-regular">Nível Regular</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="addon" id="type-addon" />
+                <Label htmlFor="type-addon">Adicional (com valor)</Label>
+              </div>
+            </RadioGroup>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

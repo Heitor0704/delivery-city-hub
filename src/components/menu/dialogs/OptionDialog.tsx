@@ -75,6 +75,16 @@ export function OptionDialog({
     }
   };
 
+  // Lista de níveis disponíveis
+  const menuLevels = [
+    { id: "1", name: "Proteína" },
+    { id: "2", name: "Tamanho" },
+    { id: "3", name: "Ponto da Carne" },
+    { id: "4", name: "Acompanhamentos" },
+    { id: "5", name: "Molhos" },
+    { id: "6", name: "Adicionais" },
+  ];
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[550px]">
@@ -117,13 +127,9 @@ export function OptionDialog({
                 <SelectValue placeholder="Escolha um nível" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Escolha um arroz">Escolha um arroz</SelectItem>
-                <SelectItem value="Escolha um feijão">Escolha um feijão</SelectItem>
-                <SelectItem value="Escolha uma carne">Escolha uma carne</SelectItem>
-                <SelectItem value="Tamanho">Tamanho</SelectItem>
-                <SelectItem value="Ponto da Carne">Ponto da Carne</SelectItem>
-                <SelectItem value="Acompanhamentos">Acompanhamentos</SelectItem>
-                <SelectItem value="Molhos">Molhos</SelectItem>
+                {menuLevels.map((level) => (
+                  <SelectItem key={level.id} value={level.name}>{level.name}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

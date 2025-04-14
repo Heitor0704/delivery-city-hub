@@ -7,12 +7,10 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 
 import { CategoryList } from "@/components/menu/CategoryList";
-import { AddonList } from "@/components/menu/AddonList";
 import { MenuLevelList } from "@/components/menu/MenuLevelList";
 import { MenuOptionList } from "@/components/menu/MenuOptionList";
 
 import { CategoryDialog } from "@/components/menu/dialogs/CategoryDialog";
-import { AddonDialog } from "@/components/menu/dialogs/AddonDialog";
 import { LevelDialog } from "@/components/menu/dialogs/LevelDialog";
 import { OptionDialog } from "@/components/menu/dialogs/OptionDialog";
 import { DeleteConfirmationDialog } from "@/components/menu/dialogs/DeleteConfirmationDialog";
@@ -22,7 +20,6 @@ export default function OwnerMenu() {
   
   // State for add dialogs
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
-  const [isAddAddonOpen, setIsAddAddonOpen] = useState(false);
   const [isAddLevelOpen, setIsAddLevelOpen] = useState(false);
   const [isAddOptionOpen, setIsAddOptionOpen] = useState(false);
   
@@ -36,9 +33,6 @@ export default function OwnerMenu() {
     switch(type) {
       case "categories":
         setIsAddCategoryOpen(true);
-        break;
-      case "addons":
-        setIsAddAddonOpen(true);
         break;
       case "levels":
         setIsAddLevelOpen(true);
@@ -77,15 +71,6 @@ export default function OwnerMenu() {
     setIsAddCategoryOpen(false);
   };
   
-  const handleSaveAddon = (addonData: any) => {
-    toast({
-      title: "Adicional salvo",
-      description: "O adicional foi salvo com sucesso.",
-    });
-    
-    setIsAddAddonOpen(false);
-  };
-  
   const handleSaveLevel = (levelData: any) => {
     toast({
       title: "Nível salvo",
@@ -116,12 +101,6 @@ export default function OwnerMenu() {
               Nova Categoria
             </Button>
           )}
-          {activeTab === "addons" && (
-            <Button size="sm" className="bg-fomex-orange hover:bg-fomex-orange/90" onClick={() => handleAdd("addons")}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Adicional
-            </Button>
-          )}
           {activeTab === "levels" && (
             <Button size="sm" className="bg-fomex-orange hover:bg-fomex-orange/90" onClick={() => handleAdd("levels")}>
               <Plus className="mr-2 h-4 w-4" />
@@ -140,17 +119,12 @@ export default function OwnerMenu() {
       <Tabs defaultValue="categories" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="w-full md:w-auto">
           <TabsTrigger value="categories" className="flex-1 md:flex-none">Categorias</TabsTrigger>
-          <TabsTrigger value="addons" className="flex-1 md:flex-none">Adicionais</TabsTrigger>
           <TabsTrigger value="levels" className="flex-1 md:flex-none">Níveis</TabsTrigger>
           <TabsTrigger value="options" className="flex-1 md:flex-none">Opções</TabsTrigger>
         </TabsList>
 
         <TabsContent value="categories">
           <CategoryList onDelete={(id) => handleDelete(id, 'category')} />
-        </TabsContent>
-        
-        <TabsContent value="addons">
-          <AddonList onDelete={(id) => handleDelete(id, 'addon')} />
         </TabsContent>
         
         <TabsContent value="levels">
@@ -167,12 +141,6 @@ export default function OwnerMenu() {
         open={isAddCategoryOpen}
         onOpenChange={setIsAddCategoryOpen}
         onSave={handleSaveCategory}
-      />
-      
-      <AddonDialog
-        open={isAddAddonOpen}
-        onOpenChange={setIsAddAddonOpen}
-        onSave={handleSaveAddon}
       />
       
       <LevelDialog
