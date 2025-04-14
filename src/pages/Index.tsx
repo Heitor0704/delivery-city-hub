@@ -13,7 +13,7 @@ const Index = () => {
     if (isAuthenticated && user) {
       console.log("Redirecting authenticated user with role:", user.role);
       
-      // Usando o role mapeado do tipo_usuario da tabela Usuarios
+      // Redirect based on user role
       switch (user.role) {
         case "owner":
           console.log("Redirecting to owner dashboard");
@@ -33,11 +33,11 @@ const Index = () => {
       }
     } else if (!isAuthenticated) {
       console.log("User not authenticated, staying on login page");
-      // Deixamos na página atual (login) se o usuário não estiver autenticado
+      // Stay on current page (login) if user is not authenticated
     }
   }, [isAuthenticated, user, navigate]);
 
-  // Esta página apenas redireciona
+  // This page only redirects
   return null;
 };
 

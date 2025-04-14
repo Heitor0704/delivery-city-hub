@@ -1,22 +1,8 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Session, User } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
 type UserRole = "admin" | "cityManager" | "owner";
-
-// This represents the user data from the Usuarios table
-interface UserData {
-  user_id: string;
-  nome_usuario: string;
-  email: string;
-  telefone: string;
-  tipo_usuario: string;
-  documento: string;
-  created_at: string;
-  senha: string;
-}
 
 interface AuthUser {
   id: string;
@@ -32,131 +18,83 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   updateUser: (userData: AuthUser) => void;
-  session: Session | null;
 }
+
+// Demo users for testing without Supabase
+const demoUsers = [
+  {
+    id: "1",
+    email: "owner@example.com",
+    name: "Restaurant Owner",
+    role: "owner" as UserRole,
+    password: "password",
+  },
+  {
+    id: "2",
+    email: "city@example.com",
+    name: "City Manager",
+    role: "cityManager" as UserRole,
+    password: "password",
+  },
+  {
+    id: "3",
+    email: "admin@example.com",
+    name: "Admin User",
+    role: "admin" as UserRole,
+    password: "password",
+  },
+];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const isAuthenticated = !!user;
 
-  // Initialize auth state and listen for changes
+  // Initialize auth state from localStorage
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event, currentSession?.user?.id);
-        setSession(currentSession);
-        
-        if (currentSession?.user) {
-          await fetchUserData(currentSession.user);
-        } else {
-          setUser(null);
-        }
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing stored user:", error);
+        localStorage.removeItem("user");
       }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
-      console.log("Got session:", currentSession?.user?.id);
-      setSession(currentSession);
-      
-      if (currentSession?.user) {
-        await fetchUserData(currentSession.user);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  // Fetch additional user data from Usuarios table
-  const fetchUserData = async (authUser: User) => {
-    try {
-      console.log("Fetching user data for email:", authUser.email);
-      
-      const { data, error } = await supabase
-        .from('Usuarios')
-        .select('*')
-        .eq('email', authUser.email)
-        .single();
-
-      console.log("User data query result:", data, error);
-
-      if (error) {
-        console.error("Error fetching user data:", error);
-        toast.error("Erro ao carregar dados do usuário");
-        return;
-      }
-
-      if (data) {
-        const userData = data as UserData;
-        console.log("Usuarios data:", userData);
-        console.log("tipo_usuario:", userData.tipo_usuario);
-        
-        // Map tipo_usuario directly to UserRole
-        let role: UserRole;
-        
-        // Map the tipo_usuario value to our application roles
-        if (userData.tipo_usuario === "admin") {
-          role = "admin";
-        } else if (userData.tipo_usuario === "cityManager" || userData.tipo_usuario === "gerente") {
-          role = "cityManager";
-        } else {
-          role = "owner"; // default or owner type
-        }
-
-        console.log("Mapped role:", role);
-
-        // Set user state with combined data
-        const authUserData = {
-          id: userData.user_id,
-          email: userData.email || authUser.email || "",
-          name: userData.nome_usuario || "",
-          role,
-          // No avatar in Usuarios table, so not setting it
-        };
-        
-        console.log("Setting user state:", authUserData);
-        setUser(authUserData);
-      } else {
-        console.error("No user data found for email:", authUser.email);
-        toast.error("Usuário não encontrado");
-      }
-    } catch (error) {
-      console.error("Error in fetchUserData:", error);
     }
-  };
+  }, []);
 
   const login = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
+      // Find user in demo data
+      const demoUser = demoUsers.find(
+        (u) => u.email === email && u.password === password
+      );
 
-      if (error) throw new Error(error.message);
+      if (!demoUser) {
+        throw new Error("Email ou senha inválidos");
+      }
+
+      // Create auth user object (excluding password)
+      const { password: _, ...authUser } = demoUser;
       
-      console.log("Login successful:", data);
-      // The user data will be fetched by the onAuthStateChange listener
+      // Update state and persist to localStorage
+      setUser(authUser);
+      localStorage.setItem("user", JSON.stringify(authUser));
+      
+      toast.success("Login realizado com sucesso!");
+      return;
     } catch (error) {
       console.error("Login error:", error);
+      toast.error(error instanceof Error ? error.message : "Falha no login");
       throw error;
     }
   };
 
-  const logout = async () => {
-    try {
-      await supabase.auth.signOut();
-      setUser(null);
-      setSession(null);
-      localStorage.removeItem("user");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+    toast.success("Sessão encerrada");
   };
 
   const updateUser = (userData: AuthUser) => {
@@ -172,7 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         updateUser,
-        session,
       }}
     >
       {children}

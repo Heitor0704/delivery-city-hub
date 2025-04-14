@@ -9,9 +9,9 @@ export default function LogoutPage() {
   const { logout } = useAuth();
 
   useEffect(() => {
-    const handleLogout = async () => {
+    const handleLogout = () => {
       try {
-        await logout();
+        logout();
         toast.success("Sessão encerrada com sucesso!");
         navigate("/");
       } catch (error) {
