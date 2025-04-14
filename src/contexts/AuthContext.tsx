@@ -21,55 +21,87 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Initialize auth state from localStorage and set up listener
   useEffect(() => {
+    console.log("AuthProvider: Setting up auth state listener");
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session);
+      async (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.id);
+        setSession(currentSession);
         
-        if (session?.user) {
+        if (currentSession?.user) {
           // Defer profile fetch with setTimeout to avoid deadlocks
           setTimeout(async () => {
             try {
+              console.log("Fetching profile for user:", currentSession.user.id);
               const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', session.user.id)
+                .eq('id', currentSession.user.id)
                 .single();
                 
-              if (error) throw error;
+              if (error) {
+                console.error('Error fetching profile:', error);
+                setUser(null);
+                return;
+              }
+              
+              console.log("Profile fetched successfully:", data);
               setUser(data as UserProfile);
             } catch (error) {
-              console.error('Error fetching profile:', error);
+              console.error('Error in profile fetch:', error);
               setUser(null);
             }
           }, 0);
         } else {
+          console.log("No session user, setting user to null");
           setUser(null);
         }
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      
-      if (session?.user) {
-        supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-          .then(({ data, error }) => {
-            if (error) {
-              console.error('Error fetching profile:', error);
+    const initializeAuth = async () => {
+      try {
+        console.log("Checking for existing session");
+        const { data: { session: existingSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error getting session:", error);
+          return;
+        }
+        
+        setSession(existingSession);
+        
+        if (existingSession?.user) {
+          console.log("Found existing session, fetching profile");
+          try {
+            const { data, error: profileError } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', existingSession.user.id)
+              .single();
+            
+            if (profileError) {
+              console.error('Error fetching profile:', profileError);
               return;
             }
+            
+            console.log("Setting user from existing session:", data);
             setUser(data as UserProfile);
-          });
+          } catch (error) {
+            console.error('Error in initial profile fetch:', error);
+          }
+        }
+      } catch (error) {
+        console.error("Error in auth initialization:", error);
       }
-    });
+    };
+    
+    initializeAuth();
 
     return () => {
+      console.log("Cleaning up auth state listener");
       subscription.unsubscribe();
     };
   }, []);
@@ -77,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Function to handle login
   const login = async (email: string, password: string) => {
     try {
+      console.log("Attempting login for:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -85,6 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw new AuthError(error.message);
       
       // The profile will be set by the onAuthStateChange listener
+      console.log("Login successful for:", email);
       toast.success("Login realizado com sucesso!");
     } catch (error) {
       console.error("Login error:", error);
@@ -98,6 +132,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.signOut().then(() => {
       setUser(null);
       toast.success("Sessão encerrada");
+    }).catch(error => {
+      console.error("Logout error:", error);
+      toast.error("Erro ao encerrar sessão");
     });
   };
 

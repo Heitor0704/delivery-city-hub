@@ -29,9 +29,10 @@ export default function AuthForm() {
       await login(email, password);
       toast.success("Login realizado com sucesso!");
       
-      // Redirect will be handled by the Index component via useEffect that monitors auth state
-      console.log("Login successful, navigation will be handled by Index component");
-      navigate('/dashboard', { replace: true });
+      // After successful login, navigate to dashboard
+      // The Index component will handle the proper redirection based on role
+      console.log("Login successful, navigating to /dashboard");
+      navigate('/dashboard');
     } catch (error) {
       console.error("Login form error:", error);
       toast.error("Erro: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
