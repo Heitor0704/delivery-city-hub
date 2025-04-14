@@ -64,7 +64,7 @@ export function ProfileSettings() {
 
         // Upload the file to Supabase Storage
         const { error: uploadError } = await supabase.storage
-          .from('profiles')
+          .from('avatars')
           .upload(filePath, file);
 
         if (uploadError) {
@@ -73,7 +73,7 @@ export function ProfileSettings() {
 
         // Get the public URL
         const { data: urlData } = await supabase.storage
-          .from('profiles')
+          .from('avatars')
           .getPublicUrl(filePath);
 
         avatarPath = urlData.publicUrl;
