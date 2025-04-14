@@ -131,7 +131,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // The profile will be set by the onAuthStateChange listener
       console.log("Login successful for:", email);
-      return data;
+      toast.success("Login realizado com sucesso!");
+      // Return void instead of the data to match the function signature
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error instanceof Error ? error.message : "Falha no login");
