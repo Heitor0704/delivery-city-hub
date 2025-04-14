@@ -46,8 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 return;
               }
               
-              console.log("Profile fetched successfully:", data);
-              setUser(data as UserProfile);
+              // Add email from session to profile data
+              const profile = {
+                ...data,
+                email: currentSession.user.email
+              } as UserProfile;
+              
+              console.log("Profile fetched successfully:", profile);
+              setUser(profile);
             } catch (error) {
               console.error('Error in profile fetch:', error);
               setUser(null);
@@ -87,8 +93,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               return;
             }
             
-            console.log("Setting user from existing session:", data);
-            setUser(data as UserProfile);
+            // Add email from session to profile data
+            const profile = {
+              ...data,
+              email: existingSession.user.email
+            } as UserProfile;
+            
+            console.log("Setting user from existing session:", profile);
+            setUser(profile);
           } catch (error) {
             console.error('Error in initial profile fetch:', error);
           }
@@ -119,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       // The profile will be set by the onAuthStateChange listener
       console.log("Login successful for:", email);
-      toast.success("Login realizado com sucesso!");
+      return data;
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error instanceof Error ? error.message : "Falha no login");

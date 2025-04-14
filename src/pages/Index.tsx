@@ -14,30 +14,24 @@ const Index = () => {
     if (isAuthenticated && user) {
       console.log("Redirecting authenticated user with role:", user.role);
       
-      // Redirect based on user role with a delay to ensure state is fully updated
-      setTimeout(() => {
-        try {
-          switch (user.role) {
-            case "admin":
-              console.log("Redirecting to admin dashboard");
-              navigate('/admin-dashboard', { replace: true });
-              break;
-            case "cityManager":
-              console.log("Redirecting to city manager dashboard");
-              navigate('/city-manager-dashboard', { replace: true });
-              break;
-            case "owner":
-              console.log("Redirecting to owner dashboard");
-              navigate('/owner-dashboard', { replace: true });
-              break;
-            default:
-              console.log("Unknown role or no role provided:", user.role);
-              navigate('/', { replace: true });
-          }
-        } catch (error) {
-          console.error("Navigation error:", error);
-        }
-      }, 100);
+      // Redirect based on user role
+      switch (user.role) {
+        case "admin":
+          console.log("Redirecting to admin dashboard");
+          navigate('/admin-dashboard', { replace: true });
+          break;
+        case "cityManager":
+          console.log("Redirecting to city manager dashboard");
+          navigate('/city-manager-dashboard', { replace: true });
+          break;
+        case "owner":
+          console.log("Redirecting to owner dashboard");
+          navigate('/owner-dashboard', { replace: true });
+          break;
+        default:
+          console.log("Unknown role or no role provided:", user.role);
+          navigate('/', { replace: true });
+      }
     } else if (!isAuthenticated) {
       console.log("User not authenticated, staying on login page");
       // Stay on current page (login) if user is not authenticated
