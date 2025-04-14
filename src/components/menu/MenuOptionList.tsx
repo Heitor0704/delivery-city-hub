@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -186,11 +185,9 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
   };
 
   const moveItem = (id: number | string, direction: 'up' | 'down') => {
-    // Find the option to move
     const optionToMove = options.find(option => option.id === id);
     if (!optionToMove) return;
     
-    // Filter options by the same level
     const sameTypeOptions = options.filter(option => option.nivel === optionToMove.nivel)
       .sort((a, b) => a.ordem - b.ordem);
       
@@ -203,12 +200,10 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
     
     const swapIndex = direction === 'up' ? index - 1 : index + 1;
     
-    // Swap ordem values within the same level
     const tempOrdem = sameTypeOptions[index].ordem;
     sameTypeOptions[index].ordem = sameTypeOptions[swapIndex].ordem;
     sameTypeOptions[swapIndex].ordem = tempOrdem;
     
-    // Update all options
     const updatedOptions = options.map(option => {
       const updatedOption = sameTypeOptions.find(o => o.id === option.id);
       return updatedOption || option;
@@ -228,7 +223,6 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
     
     const maxId = Math.max(...options.map(o => Number(o.id)));
     
-    // Find the max order for the specific level
     const sameTypeOptions = options.filter(o => o.nivel === optionToDuplicate.nivel);
     const maxOrder = Math.max(...sameTypeOptions.map(o => Number(o.ordem)));
     
@@ -247,12 +241,10 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
     });
   };
 
-  // Filter options based on the selected level (if any)
   const filteredOptions = selectedLevel
     ? options.filter(option => option.nivel === selectedLevel)
     : options;
 
-  // Group options by level and sort by order
   const groupedOptions = filteredOptions.reduce((result, item) => {
     if (!result[item.nivel]) {
       result[item.nivel] = [];
@@ -261,12 +253,10 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
     return result;
   }, {} as Record<string, typeof options>);
 
-  // Sort options within each level
   Object.keys(groupedOptions).forEach(level => {
     groupedOptions[level].sort((a, b) => a.ordem - b.ordem);
   });
 
-  // Flatten the grouped options back into a single array
   const sortedOptions = Object.values(groupedOptions).flat();
 
   return (
@@ -280,7 +270,7 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
             <SelectValue placeholder="Filtrar por nível" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Todos os níveis</SelectItem>
+            <SelectItem value="all">Todos os níveis</SelectItem>
             {availableLevels.map(level => (
               <SelectItem key={level} value={level}>{level}</SelectItem>
             ))}
