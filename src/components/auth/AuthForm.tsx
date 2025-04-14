@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,14 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-
 export default function AuthForm() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const {
+    login
+  } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -24,10 +23,11 @@ export default function AuthForm() {
         setIsLoading(false);
         return;
       }
-
-      console.log("Attempting login with:", { email });
+      console.log("Attempting login with:", {
+        email
+      });
       await login(email, password);
-      
+
       // After successful login, navigate to index which will handle redirections
       navigate('/index');
     } catch (error) {
@@ -37,9 +37,7 @@ export default function AuthForm() {
       setIsLoading(false);
     }
   };
-
-  return (
-    <Card className="w-[380px] shadow-lg bg-white/95 border-none rounded-lg overflow-hidden">
+  return <Card className="w-[380px] shadow-lg bg-white/95 border-none rounded-lg overflow-hidden">
       <CardContent className="p-0">
         <div className="flex flex-col items-center p-6 pb-0">
           <div className="mb-6 flex flex-col items-center">
@@ -60,14 +58,7 @@ export default function AuthForm() {
             {isLoading ? "Processando..." : "ENTRAR"}
           </Button>
           
-          <div className="mt-4 text-center text-sm text-gray-600">
-            <p>Demonstração: Use as credenciais abaixo</p>
-            <ul className="mt-2 space-y-1">
-              <li>owner@fomex.com / 123456</li>
-              <li>manager@fomex.com / 123456</li>
-              <li>admin@fomex.com / 123456</li>
-            </ul>
-          </div>
+          
           
           <div className="flex justify-center mt-4">
             <button type="button" className="text-orange-600 hover:text-orange-800 text-sm" onClick={() => toast.info("Função de recuperar senha em desenvolvimento")}>
@@ -76,6 +67,5 @@ export default function AuthForm() {
           </div>
         </form>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 }
