@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +15,7 @@ import {
 import { DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ImagePlus, X, Trash } from "lucide-react";
+import { ImagePlus, X, Trash, ChevronUp, ChevronDown, Check, Search } from "lucide-react";
 
 interface ProductFormProps {
   product?: any;
@@ -44,8 +44,19 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
     ordem: product?.ordem || "1",
   });
 
-  const [selectedLevels, setSelectedLevels] = useState<string[]>(product?.levels || []);
+  const [selectedLevels, setSelectedLevels] = useState<{id: string, name: string, order: number}[]>(
+    product?.levels ? product.levels.map((lvl: string, idx: number) => {
+      const level = menuLevels.find(l => l.id === lvl);
+      return {
+        id: lvl,
+        name: level?.name || `Level ${lvl}`,
+        order: idx + 1
+      };
+    }) : []
+  );
+  
   const [activeTab, setActiveTab] = useState("basic");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -54,14 +65,6 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
 
   const handleRadioChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value === "sim" }));
-  };
-
-  const handleSelectedLevelsChange = (levelId: string) => {
-    if (selectedLevels.includes(levelId)) {
-      setSelectedLevels(selectedLevels.filter(l => l !== levelId));
-    } else {
-      setSelectedLevels([...selectedLevels, levelId]);
-    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,14 +81,66 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Em um ambiente real, aqui faríamos uma chamada à API
-    console.log("Form submitted with data:", { ...formData, levels: selectedLevels });
+    // In a real environment, we would make an API call
+    console.log("Form submitted with data:", { 
+      ...formData, 
+      levels: selectedLevels.map(level => level.id).sort((a, b) => 
+        selectedLevels.find(l => l.id === a)!.order - selectedLevels.find(l => l.id === b)!.order
+      ) 
+    });
     onSuccess();
   };
 
-  const getLevelById = (id: string) => {
-    return menuLevels.find(level => level.id === id);
+  const handleAddLevel = (levelId: string) => {
+    // Check if level is already selected
+    if (selectedLevels.some(level => level.id === levelId)) {
+      return;
+    }
+
+    const level = menuLevels.find(level => level.id === levelId);
+    if (level) {
+      const maxOrder = selectedLevels.length > 0 
+        ? Math.max(...selectedLevels.map(l => l.order))
+        : 0;
+      
+      setSelectedLevels([
+        ...selectedLevels,
+        { id: level.id, name: level.name, order: maxOrder + 1 }
+      ]);
+    }
   };
+
+  const handleRemoveLevel = (levelId: string) => {
+    setSelectedLevels(selectedLevels.filter(level => level.id !== levelId));
+  };
+
+  const moveLevel = (levelId: string, direction: 'up' | 'down') => {
+    const index = selectedLevels.findIndex(level => level.id === levelId);
+    if (index === -1) return;
+    
+    if ((direction === 'up' && index === 0) || 
+        (direction === 'down' && index === selectedLevels.length - 1)) {
+      return;
+    }
+    
+    const newLevels = [...selectedLevels];
+    const swapIndex = direction === 'up' ? index - 1 : index + 1;
+    
+    // Swap orders
+    const tempOrder = newLevels[index].order;
+    newLevels[index].order = newLevels[swapIndex].order;
+    newLevels[swapIndex].order = tempOrder;
+    
+    // Swap positions in array to reflect the new order
+    [newLevels[index], newLevels[swapIndex]] = [newLevels[swapIndex], newLevels[index]];
+    
+    setSelectedLevels(newLevels);
+  };
+
+  // Filter levels based on search term
+  const filteredLevels = menuLevels.filter(level =>
+    level.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <form onSubmit={handleSubmit}>
@@ -212,67 +267,136 @@ export function ProductForm({ product, onSuccess }: ProductFormProps) {
         <TabsContent value="options" className="space-y-6">
           <div className="space-y-4">
             <Label className="font-medium text-gray-700 block text-lg">
-              Níveis de Opções
+              Níveis de Opções do Produto
             </Label>
             
-            <div className="grid grid-cols-1 gap-4 mt-2">
+            <div className="flex flex-col space-y-4">
+              {/* Search and filter section */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Buscar níveis..."
+                  className="pl-8"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              {/* Selected levels section */}
               {selectedLevels.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {selectedLevels.map((levelId) => {
-                    const level = getLevelById(levelId);
-                    return (
-                      <Badge 
-                        key={levelId} 
-                        className="bg-orange-100 text-orange-800 hover:bg-orange-200 px-3 py-1 rounded-full flex items-center"
-                      >
-                        {level?.name || levelId}
-                        <button 
-                          type="button" 
-                          className="ml-2 focus:outline-none" 
-                          onClick={() => handleSelectedLevelsChange(levelId)}
+                <div className="space-y-2">
+                  <Label className="font-medium text-gray-700">Níveis Selecionados:</Label>
+                  <div className="border rounded-md divide-y">
+                    {selectedLevels
+                      .sort((a, b) => a.order - b.order)
+                      .map((level) => (
+                        <div 
+                          key={level.id} 
+                          className="p-3 flex items-center justify-between"
                         >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </Badge>
-                    );
-                  })}
+                          <div className="flex items-center">
+                            <Badge className="mr-2 bg-orange-100 text-orange-800">
+                              {level.order}
+                            </Badge>
+                            <span>{level.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="icon" 
+                              className="h-7 w-7" 
+                              onClick={() => moveLevel(level.id, 'up')}
+                            >
+                              <ChevronUp className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="icon" 
+                              className="h-7 w-7" 
+                              onClick={() => moveLevel(level.id, 'down')}
+                            >
+                              <ChevronDown className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              type="button"
+                              variant="outline" 
+                              size="icon" 
+                              className="h-7 w-7 text-destructive" 
+                              onClick={() => handleRemoveLevel(level.id)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
                 </div>
               )}
-            
-              {menuLevels.map((level) => (
-                <div 
-                  key={level.id} 
-                  className={`p-4 border rounded-md cursor-pointer flex items-center justify-between ${
-                    selectedLevels.includes(level.id) 
-                      ? "border-fomex-orange bg-amber-50" 
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onClick={() => handleSelectedLevelsChange(level.id)}
-                >
-                  <div>
-                    <div className="font-medium">{level.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {level.name === "Tamanho" && "Pequeno, Médio, Grande"}
-                      {level.name === "Ponto da Carne" && "Mal passado, Ao ponto, Bem passado"}
-                      {level.name === "Molhos" && "Barbecue, Mostarda e Mel, etc"}
-                      {level.name === "Escolha um arroz" && "Branco, Integral, Sem arroz"}
-                      {level.name === "Escolha um feijão" && "Preto, Carioca, Sem feijão"}
+              
+              {/* Available levels section */}
+              <div className="space-y-2">
+                <Label className="font-medium text-gray-700">Níveis Disponíveis:</Label>
+                <div className="grid grid-cols-1 gap-4 mt-2">
+                  {filteredLevels.length > 0 ? (
+                    filteredLevels.map((level) => (
+                      <div
+                        key={level.id}
+                        className={`p-4 border rounded-md flex items-center justify-between cursor-pointer hover:bg-gray-50 ${
+                          selectedLevels.some(l => l.id === level.id) 
+                            ? "border-orange-300 bg-orange-50" 
+                            : "border-gray-200"
+                        }`}
+                        onClick={() => {
+                          if (selectedLevels.some(l => l.id === level.id)) {
+                            handleRemoveLevel(level.id);
+                          } else {
+                            handleAddLevel(level.id);
+                          }
+                        }}
+                      >
+                        <div>
+                          <div className="font-medium">{level.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {level.name === "Tamanho" && "Pequeno, Médio, Grande"}
+                            {level.name === "Ponto da Carne" && "Mal passado, Ao ponto, Bem passado"}
+                            {level.name === "Molhos" && "Barbecue, Mostarda e Mel, etc"}
+                            {level.name === "Escolha um arroz" && "Branco, Integral, Sem arroz"}
+                            {level.name === "Escolha um feijão" && "Preto, Carioca, Sem feijão"}
+                          </div>
+                        </div>
+                        <div className="flex items-center">
+                          {selectedLevels.some(l => l.id === level.id) ? (
+                            <Check className="h-5 w-5 text-orange-500" />
+                          ) : (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddLevel(level.id);
+                              }}
+                            >
+                              Selecionar
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center p-4 text-muted-foreground">
+                      Nenhum nível encontrado com essa busca.
                     </div>
-                  </div>
-                  <div>
-                    <input 
-                      type="checkbox" 
-                      checked={selectedLevels.includes(level.id)}
-                      onChange={() => {}}
-                      className="form-checkbox h-5 w-5 text-orange-500 rounded focus:ring-orange-500"
-                    />
-                  </div>
+                  )}
                 </div>
-              ))}
+              </div>
             </div>
             
             <div className="text-sm text-muted-foreground mt-2">
               Selecione os níveis de personalização que se aplicam a este produto.
+              Use os botões para reordenar os níveis selecionados.
             </div>
           </div>
         </TabsContent>

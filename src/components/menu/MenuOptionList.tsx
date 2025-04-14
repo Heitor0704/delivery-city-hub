@@ -27,9 +27,10 @@ const availableLevels = [
 interface MenuOptionListProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
+  onSaveOption?: (option: any) => void;
 }
 
-export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
+export function MenuOptionList({ onEdit, onDelete, onSaveOption }: MenuOptionListProps) {
   const [options, setOptions] = useState(initialOptions);
   const [editingOption, setEditingOption] = useState<any>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -49,6 +50,10 @@ export function MenuOptionList({ onEdit, onDelete }: MenuOptionListProps) {
       item.id === updatedOption.id ? updatedOption : item
     );
     setOptions(updatedOptions);
+    
+    if (onSaveOption) {
+      onSaveOption(updatedOption);
+    }
     
     toast({
       title: "Opção atualizada",
