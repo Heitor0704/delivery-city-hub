@@ -7,7 +7,7 @@ export interface Category {
   ativo: boolean;
 }
 
-export const initialCategories = [
+export const initialCategories: Category[] = [
   { id: 1, nome: "Hambúrgueres", descricao: "Hambúrgueres artesanais", imagem: "burger.jpg", ativo: true },
   { id: 2, nome: "Pizzas", descricao: "Pizzas tradicionais e premium", imagem: "pizza.jpg", ativo: true },
   { id: 3, nome: "Bebidas", descricao: "Refrigerantes, sucos e bebidas alcoólicas", imagem: "drinks.jpg", ativo: true },

@@ -12,7 +12,7 @@ interface CategoryListProps {
 }
 
 export function CategoryList({ onEdit, onDelete }: CategoryListProps) {
-  const [categories, setCategories] = useState(initialCategories);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { toast } = useToast();
