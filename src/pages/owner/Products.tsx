@@ -1,12 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PageLayout } from "@/components/layout/PageLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
-  Plus, Search, Filter, Edit, Trash2, ToggleLeft, ToggleRight, Star, Loader2
+  Plus, Search, Filter, Edit, Trash2, ToggleLeft, ToggleRight, Star, ImagePlus 
 } from "lucide-react";
 import {
   Table,
@@ -28,34 +28,92 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
+  DialogClose
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { ProductForm } from "@/components/products/ProductForm";
-import { useMenu } from "@/hooks/useMenu";
-import { formatCurrency } from "@/lib/formatters";
+
+// Dados simulados para produtos
+const products = [
+  {
+    id: 1,
+    nome: "X-Tudo",
+    categoria: "Hambúrgueres",
+    valor: "R$ 28,90",
+    disponivel: true,
+    destaque: true,
+    imagem: "/placeholder.svg"
+  },
+  {
+    id: 2,
+    nome: "X-Salada",
+    categoria: "Hambúrgueres",
+    valor: "R$ 22,90",
+    disponivel: true,
+    destaque: false,
+    imagem: "/placeholder.svg"
+  },
+  {
+    id: 3,
+    nome: "Coca-Cola 350ml",
+    categoria: "Bebidas",
+    valor: "R$ 5,50",
+    disponivel: true,
+    destaque: false,
+    imagem: "/placeholder.svg"
+  },
+  {
+    id: 4,
+    nome: "Batata Frita Grande",
+    categoria: "Acompanhamentos",
+    valor: "R$ 15,90",
+    disponivel: false,
+    destaque: false,
+    imagem: "/placeholder.svg"
+  },
+  {
+    id: 5,
+    nome: "Pudim",
+    categoria: "Sobremesas",
+    valor: "R$ 12,50",
+    disponivel: true,
+    destaque: true,
+    imagem: "/placeholder.svg"
+  },
+];
 
 export default function OwnerProducts() {
-  const { categories, products, isLoading, toggleProductStatus, toggleProductHighlight, removeProduct } = useMenu();
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("todas");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const { toast } = useToast();
+
+  const categories = ["Hambúrgueres", "Bebidas", "Acompanhamentos", "Sobremesas"];
 
   const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.nome_produto.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "todas" || product.categoria_id.toString() === categoryFilter;
+    const matchesSearch = product.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === "todas" || product.categoria === categoryFilter;
     
     return matchesSearch && matchesCategory;
   });
 
-  const handleToggleAvailability = async (product: any) => {
-    const isAvailable = product.status !== "disponível";
-    await toggleProductStatus(product.id, isAvailable);
+  const handleToggleAvailability = (productId: number) => {
+    // Em um ambiente real, aqui faríamos uma chamada à API para atualizar o status
+    toast({
+      title: "Status alterado",
+      description: "Disponibilidade do produto foi atualizada com sucesso.",
+    });
   };
 
-  const handleToggleFeatured = async (product: any) => {
-    await toggleProductHighlight(product.id, !product.destaque);
+  const handleToggleFeatured = (productId: number) => {
+    // Em um ambiente real, aqui faríamos uma chamada à API para atualizar o destaque
+    toast({
+      title: "Status alterado",
+      description: "Destaque do produto foi atualizado com sucesso.",
+    });
   };
 
   const handleEditProduct = (product: any) => {
@@ -68,29 +126,14 @@ export default function OwnerProducts() {
     setIsDialogOpen(true);
   };
 
-  const handleDeleteProduct = async (id: number) => {
-    setDeletingId(id);
-    await removeProduct(id);
-    setDeletingId(null);
+  const handleDeleteProduct = (productId: number) => {
+    // Em um ambiente real, aqui faríamos uma chamada à API para excluir o produto
+    toast({
+      title: "Produto excluído",
+      description: "O produto foi removido com sucesso.",
+      variant: "destructive",
+    });
   };
-
-  const getCategoryName = (categoryId: number) => {
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.categoria : "Sem categoria";
-  };
-
-  if (isLoading) {
-    return (
-      <PageLayout 
-        title="Gerenciar Produtos"
-        description="Carregando produtos do seu estabelecimento..."
-      >
-        <div className="flex justify-center items-center p-16">
-          <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
-        </div>
-      </PageLayout>
-    );
-  }
 
   return (
     <PageLayout 
@@ -130,7 +173,7 @@ export default function OwnerProducts() {
               <SelectContent>
                 <SelectItem value="todas">Todas as categorias</SelectItem>
                 {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id.toString()}>{category.categoria}</SelectItem>
+                  <SelectItem key={category} value={category}>{category}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -157,33 +200,30 @@ export default function OwnerProducts() {
                       <TableCell className="flex items-center space-x-3">
                         <div className="h-10 w-10 rounded-md overflow-hidden flex-shrink-0">
                           <img 
-                            src={product.foto || "/placeholder.svg"} 
-                            alt={product.nome_produto} 
+                            src={product.imagem} 
+                            alt={product.nome} 
                             className="h-full w-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = "/placeholder.svg";
-                            }}
                           />
                         </div>
-                        <span className="font-medium">{product.nome_produto}</span>
+                        <span className="font-medium">{product.nome}</span>
                       </TableCell>
-                      <TableCell>{getCategoryName(product.categoria_id)}</TableCell>
-                      <TableCell>{formatCurrency(product.preco)}</TableCell>
+                      <TableCell>{product.categoria}</TableCell>
+                      <TableCell>{product.valor}</TableCell>
                       <TableCell>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => handleToggleAvailability(product)}
-                          className={product.status === "disponível" ? "text-green-600" : "text-gray-400"}
+                          onClick={() => handleToggleAvailability(product.id)}
+                          className={product.disponivel ? "text-green-600" : "text-gray-400"}
                         >
-                          {product.status === "disponível" ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
+                          {product.disponivel ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
                         </Button>
                       </TableCell>
                       <TableCell>
                         <Button 
                           variant="ghost" 
                           size="icon" 
-                          onClick={() => handleToggleFeatured(product)}
+                          onClick={() => handleToggleFeatured(product.id)}
                           className={product.destaque ? "text-amber-500" : "text-gray-400"}
                         >
                           <Star className="h-5 w-5" fill={product.destaque ? "currentColor" : "none"} />
@@ -199,13 +239,8 @@ export default function OwnerProducts() {
                             size="icon" 
                             className="text-destructive"
                             onClick={() => handleDeleteProduct(product.id)}
-                            disabled={deletingId === product.id}
                           >
-                            {deletingId === product.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -233,17 +268,14 @@ export default function OwnerProducts() {
           </DialogHeader>
           <ProductForm 
             product={selectedProduct} 
-            categories={categories}
             onSuccess={() => {
               setIsDialogOpen(false);
-              toast(
-                selectedProduct ? "Produto atualizado" : "Produto criado",
-                {
-                  description: selectedProduct 
-                    ? "O produto foi atualizado com sucesso." 
-                    : "O produto foi criado com sucesso.",
-                }
-              );
+              toast({
+                title: selectedProduct ? "Produto atualizado" : "Produto criado",
+                description: selectedProduct 
+                  ? "O produto foi atualizado com sucesso." 
+                  : "O produto foi criado com sucesso.",
+              });
             }} 
           />
         </DialogContent>

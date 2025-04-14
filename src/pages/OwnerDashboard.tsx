@@ -3,22 +3,74 @@ import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, LineChart } from "@/components/ui/chart";
-import { Package, CreditCard, TrendingUp, Users, Loader2 } from "lucide-react";
+import { Package, CreditCard, TrendingUp, Users } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useRestaurant } from "@/hooks/useRestaurant";
-import { formatCurrency } from "@/lib/formatters";
+
+// Dados simulados para o dashboard
+const revenueData = [
+  {
+    name: "Jan",
+    total: 1800,
+  },
+  {
+    name: "Fev",
+    total: 2200,
+  },
+  {
+    name: "Mar",
+    total: 2500,
+  },
+  {
+    name: "Abr",
+    total: 2300,
+  },
+  {
+    name: "Mai",
+    total: 2800,
+  },
+  {
+    name: "Jun",
+    total: 3200,
+  },
+  {
+    name: "Jul",
+    total: 3500,
+  },
+];
+
+const ordersByDayData = [
+  {
+    name: "Dom",
+    pedidos: 25,
+  },
+  {
+    name: "Seg",
+    pedidos: 18,
+  },
+  {
+    name: "Ter",
+    pedidos: 22,
+  },
+  {
+    name: "Qua",
+    pedidos: 30,
+  },
+  {
+    name: "Qui",
+    pedidos: 35,
+  },
+  {
+    name: "Sex",
+    pedidos: 48,
+  },
+  {
+    name: "Sáb",
+    pedidos: 52,
+  },
+];
 
 export default function OwnerDashboard() {
   const { toast } = useToast();
-  const { 
-    restaurant, 
-    isLoading, 
-    recentOrders, 
-    orderStats,
-    salesByMonth,
-    ordersByDay,
-    categorySales
-  } = useRestaurant();
 
   const audio = new Audio("/notification.mp3");
 
@@ -40,27 +92,9 @@ export default function OwnerDashboard() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-fomex-orange" />
-        <span className="ml-2">Carregando dados do estabelecimento...</span>
-      </div>
-    );
-  }
-
-  if (!restaurant) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Estabelecimento não encontrado</h1>
-        <p>Não foi possível encontrar um estabelecimento associado ao seu usuário.</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Visão Geral - {restaurant.nome_estabelecimento}</h1>
+      <h1 className="text-2xl font-bold">Visão Geral</h1>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -69,7 +103,7 @@ export default function OwnerDashboard() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orderStats?.today || 0}</div>
+            <div className="text-2xl font-bold">23</div>
             <p className="text-xs text-muted-foreground">+15% em relação a ontem</p>
           </CardContent>
         </Card>
@@ -79,7 +113,7 @@ export default function OwnerDashboard() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(orderStats?.revenue || 0)}</div>
+            <div className="text-2xl font-bold">R$ 1.245,00</div>
             <p className="text-xs text-muted-foreground">+8% em relação a ontem</p>
           </CardContent>
         </Card>
@@ -89,7 +123,7 @@ export default function OwnerDashboard() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orderStats?.conversion || 0}%</div>
+            <div className="text-2xl font-bold">78%</div>
             <p className="text-xs text-muted-foreground">+3% em relação a ontem</p>
           </CardContent>
         </Card>
@@ -99,7 +133,7 @@ export default function OwnerDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orderStats?.newCustomers || 0}</div>
+            <div className="text-2xl font-bold">12</div>
             <p className="text-xs text-muted-foreground">+7% em relação a ontem</p>
           </CardContent>
         </Card>
@@ -113,11 +147,11 @@ export default function OwnerDashboard() {
           </CardHeader>
           <CardContent>
             <LineChart
-              data={salesByMonth}
+              data={revenueData}
               categories={["total"]}
               colors={["#E53935"]}
               valueFormatter={(value: number) =>
-                formatCurrency(value)
+                `R$ ${value.toLocaleString("pt-BR")}`
               }
               className="aspect-[4/3]"
             />
@@ -131,7 +165,7 @@ export default function OwnerDashboard() {
           </CardHeader>
           <CardContent>
             <BarChart
-              data={ordersByDay}
+              data={ordersByDayData}
               categories={["pedidos"]}
               colors={["#1E3A8A"]}
               className="aspect-[4/3]"
@@ -146,15 +180,34 @@ export default function OwnerDashboard() {
             <CardTitle>Categorias Mais Vendidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {categorySales.map((category) => (
-              <div key={category.name} className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>{category.name}</div>
-                  <div className="text-sm text-muted-foreground">{category.percentage}%</div>
-                </div>
-                <Progress value={category.percentage} className="h-2" />
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>Hambúrgueres</div>
+                <div className="text-sm text-muted-foreground">45%</div>
               </div>
-            ))}
+              <Progress value={45} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>Pizzas</div>
+                <div className="text-sm text-muted-foreground">30%</div>
+              </div>
+              <Progress value={30} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>Bebidas</div>
+                <div className="text-sm text-muted-foreground">15%</div>
+              </div>
+              <Progress value={15} className="h-2" />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div>Sobremesas</div>
+                <div className="text-sm text-muted-foreground">10%</div>
+              </div>
+              <Progress value={10} className="h-2" />
+            </div>
           </CardContent>
         </Card>
 
@@ -164,40 +217,34 @@ export default function OwnerDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentOrders.length > 0 ? (
-                recentOrders.map((order) => (
-                  <div key={order.id} className="flex items-center justify-between border-b pb-2">
-                    <div>
-                      <p className="font-medium">Cliente #{order.cliente_userId?.substring(0, 8)}</p>
-                      <p className="text-sm text-muted-foreground">Pedido #{order.id}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium">{formatCurrency(order.valor_total || 0)}</p>
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`inline-block h-2 w-2 rounded-full ${
-                            order.status === "entregue"
-                              ? "bg-green-500"
-                              : order.status === "em_entrega"
-                              ? "bg-yellow-500"
-                              : "bg-blue-500"
-                          }`}
-                        />
-                        <span className="text-xs">{
-                          order.status === "entregue" ? "Entregue" :
-                          order.status === "em_entrega" ? "Em entrega" :
-                          order.status === "preparando" ? "Preparando" :
-                          order.status
-                        }</span>
-                      </div>
+              {[
+                { id: "12345", customer: "Carlos Silva", time: "10 min atrás", status: "Entregue", total: "R$ 89,90" },
+                { id: "12344", customer: "Ana Oliveira", time: "35 min atrás", status: "Em entrega", total: "R$ 65,00" },
+                { id: "12343", customer: "João Pereira", time: "1 hora atrás", status: "Preparando", total: "R$ 122,50" },
+                { id: "12342", customer: "Maria Souza", time: "2 horas atrás", status: "Entregue", total: "R$ 45,00" },
+              ].map((order) => (
+                <div key={order.id} className="flex items-center justify-between border-b pb-2">
+                  <div>
+                    <p className="font-medium">{order.customer}</p>
+                    <p className="text-sm text-muted-foreground">Pedido #{order.id}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{order.total}</p>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`inline-block h-2 w-2 rounded-full ${
+                          order.status === "Entregue"
+                            ? "bg-green-500"
+                            : order.status === "Em entrega"
+                            ? "bg-yellow-500"
+                            : "bg-blue-500"
+                        }`}
+                      />
+                      <span className="text-xs">{order.status}</span>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-muted-foreground text-center py-4">
-                  Nenhum pedido recente encontrado.
-                </p>
-              )}
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
