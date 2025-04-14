@@ -15,8 +15,20 @@ import { LevelDialog } from "@/components/menu/dialogs/LevelDialog";
 import { OptionDialog } from "@/components/menu/dialogs/OptionDialog";
 import { DeleteConfirmationDialog } from "@/components/menu/dialogs/DeleteConfirmationDialog";
 
+// Sample options data for demonstration
+const initialMenuOptions = [
+  { id: 1, nome: "Picanha", preco: "R$ 5,00", nivel: "Proteína", ativo: true },
+  { id: 2, nome: "Filé Mignon", preco: "R$ 7,00", nivel: "Proteína", ativo: true },
+  { id: 3, nome: "Pequeno", preco: "R$ 0,00", nivel: "Tamanho", ativo: true },
+  { id: 4, nome: "Médio", preco: "R$ 3,00", nivel: "Tamanho", ativo: true },
+  { id: 5, nome: "Grande", preco: "R$ 5,00", nivel: "Tamanho", ativo: false },
+  { id: 6, nome: "Batata Frita", preco: "R$ 8,00", nivel: "Adicionais", ativo: true },
+  { id: 7, nome: "Bacon Extra", preco: "R$ 4,00", nivel: "Adicionais", ativo: true },
+];
+
 export default function OwnerMenu() {
   const [activeTab, setActiveTab] = useState("categories");
+  const [menuOptions, setMenuOptions] = useState(initialMenuOptions);
   
   // State for add dialogs
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
@@ -72,6 +84,9 @@ export default function OwnerMenu() {
   };
   
   const handleSaveLevel = (levelData: any) => {
+    // Store selected options in the level
+    console.log("Nível salvo com opções:", levelData);
+    
     toast({
       title: "Nível salvo",
       description: "O nível foi salvo com sucesso.",
@@ -81,6 +96,17 @@ export default function OwnerMenu() {
   };
   
   const handleSaveOption = (optionData: any) => {
+    // In a real app, we would add this to the menuOptions state
+    const newOption = {
+      id: menuOptions.length + 1,
+      nome: optionData.name,
+      preco: optionData.price,
+      nivel: optionData.level,
+      ativo: optionData.active
+    };
+    
+    setMenuOptions([...menuOptions, newOption]);
+    
     toast({
       title: "Opção salva",
       description: "A opção foi salva com sucesso.",
@@ -132,7 +158,16 @@ export default function OwnerMenu() {
         </TabsContent>
         
         <TabsContent value="options">
-          <MenuOptionList onDelete={(id) => handleDelete(id, 'option')} />
+          <MenuOptionList 
+            onDelete={(id) => handleDelete(id, 'option')}
+            onSaveOption={(option) => {
+              // Update menuOptions state when an option is saved via MenuOptionList
+              const updatedOptions = menuOptions.map(o => 
+                o.id === option.id ? option : o
+              );
+              setMenuOptions(updatedOptions);
+            }} 
+          />
         </TabsContent>
       </Tabs>
 
@@ -147,6 +182,7 @@ export default function OwnerMenu() {
         open={isAddLevelOpen}
         onOpenChange={setIsAddLevelOpen}
         onSave={handleSaveLevel}
+        availableOptions={menuOptions}
       />
       
       <OptionDialog
