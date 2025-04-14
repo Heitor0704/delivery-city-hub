@@ -44,12 +44,14 @@ export function ProfileSettings() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Update user in context
-      updateUser({
-        ...user!,
-        full_name: name,
-        avatar: avatar || undefined,
-      });
+      // Update user in context (ensuring we maintain all other properties)
+      if (user) {
+        updateUser({
+          ...user,
+          full_name: name,
+          avatar: avatar || undefined,
+        });
+      }
       
       toast({
         title: "Perfil atualizado",

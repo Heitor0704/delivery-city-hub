@@ -21,6 +21,7 @@ export type UserProfile = {
   full_name?: string;
   role: 'owner' | 'cityManager' | 'admin' | 'customer';
   email?: string; // Add email for easier reference
+  avatar?: string; // Add avatar property to fix TypeScript errors
 };
 
 // Custom error type for authentication errors
@@ -44,7 +45,7 @@ export const getSession = async () => {
     console.error("Unexpected error in getSession:", error);
     return null;
   }
-};
+}
 
 // Helper to get the current user profile with role
 export const getUserProfile = async () => {

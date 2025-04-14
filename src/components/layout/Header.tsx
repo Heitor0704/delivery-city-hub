@@ -75,7 +75,7 @@ export function Header({ toggleSidebarMobile }: HeaderProps) {
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.avatar || ""} />
                 <AvatarFallback className="bg-fomex-orange text-white">
-                  {user ? getInitials(user.full_name || user.email) : "U"}
+                  {user ? getInitials(user.full_name || user.email || "") : "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start text-sm">
