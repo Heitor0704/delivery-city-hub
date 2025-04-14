@@ -1,89 +1,91 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { User, Session } from "@supabase/supabase-js";
+import { supabase, UserProfile, AuthError } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-type UserRole = "admin" | "cityManager" | "owner";
-
-interface AuthUser {
-  id: string;
-  email: string;
-  name?: string;
-  role: UserRole;
-  avatar?: string;
-}
-
 interface AuthContextType {
-  user: AuthUser | null;
+  user: UserProfile | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  updateUser: (userData: AuthUser) => void;
+  updateUser: (userData: UserProfile) => void;
 }
-
-// Demo users for testing without Supabase
-const demoUsers = [
-  {
-    id: "1",
-    email: "owner@example.com",
-    name: "Restaurant Owner",
-    role: "owner" as UserRole,
-    password: "password",
-  },
-  {
-    id: "2",
-    email: "city@example.com",
-    name: "City Manager",
-    role: "cityManager" as UserRole,
-    password: "password",
-  },
-  {
-    id: "3",
-    email: "admin@example.com",
-    name: "Admin User",
-    role: "admin" as UserRole,
-    password: "password",
-  },
-];
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const isAuthenticated = !!user;
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and set up listener
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (error) {
-        console.error("Error parsing stored user:", error);
-        localStorage.removeItem("user");
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          // Defer profile fetch with setTimeout to avoid deadlocks
+          setTimeout(async () => {
+            try {
+              const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+                
+              if (error) throw error;
+              setUser(data as UserProfile);
+            } catch (error) {
+              console.error('Error fetching profile:', error);
+              setUser(null);
+            }
+          }, 0);
+        } else {
+          setUser(null);
+        }
       }
-    }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      
+      if (session?.user) {
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data, error }) => {
+            if (error) {
+              console.error('Error fetching profile:', error);
+              return;
+            }
+            setUser(data as UserProfile);
+          });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
+  // Function to handle login
   const login = async (email: string, password: string) => {
     try {
-      // Find user in demo data
-      const demoUser = demoUsers.find(
-        (u) => u.email === email && u.password === password
-      );
-
-      if (!demoUser) {
-        throw new Error("Email ou senha inválidos");
-      }
-
-      // Create auth user object (excluding password)
-      const { password: _, ...authUser } = demoUser;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
       
-      // Update state and persist to localStorage
-      setUser(authUser);
-      localStorage.setItem("user", JSON.stringify(authUser));
+      if (error) throw new AuthError(error.message);
       
+      // The profile will be set by the onAuthStateChange listener
       toast.success("Login realizado com sucesso!");
-      return;
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error instanceof Error ? error.message : "Falha no login");
@@ -91,15 +93,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Function to handle logout
   const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-    toast.success("Sessão encerrada");
+    supabase.auth.signOut().then(() => {
+      setUser(null);
+      toast.success("Sessão encerrada");
+    });
   };
 
-  const updateUser = (userData: AuthUser) => {
+  // Function to update user data
+  const updateUser = (userData: UserProfile) => {
     setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
   };
 
   return (
@@ -117,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Custom hook to use the auth context
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

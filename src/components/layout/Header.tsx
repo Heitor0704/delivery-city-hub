@@ -75,11 +75,11 @@ export function Header({ toggleSidebarMobile }: HeaderProps) {
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.avatar || ""} />
                 <AvatarFallback className="bg-fomex-orange text-white">
-                  {user ? getInitials(user.name || user.email) : "U"}
+                  {user ? getInitials(user.full_name || user.email) : "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start text-sm">
-                <span className="font-medium">{user?.name || user?.email}</span>
+                <span className="font-medium">{user?.full_name || user?.email}</span>
                 <span className="text-xs text-muted-foreground">
                   {user?.role === "owner" && "Estabelecimento"}
                   {user?.role === "cityManager" && "Gerente"}
@@ -92,7 +92,7 @@ export function Header({ toggleSidebarMobile }: HeaderProps) {
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name || user?.email}</p>
+                <p className="text-sm font-medium leading-none">{user?.full_name || user?.email}</p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.role === "owner" && "Dono do Estabelecimento"}
                   {user?.role === "cityManager" && "Gerente da Cidade"}
