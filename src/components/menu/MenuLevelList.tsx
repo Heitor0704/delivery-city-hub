@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { LevelDialog } from "./dialogs/LevelDialog";
-
 const initialLevels = [{
   id: 1,
   nome: "Proteína",
@@ -18,7 +16,13 @@ const initialLevels = [{
   maximo: 1,
   ativo: true,
   ordem: 1,
-  options: [{ optionId: 1, order: 1 }, { optionId: 2, order: 2 }]
+  options: [{
+    optionId: 1,
+    order: 1
+  }, {
+    optionId: 2,
+    order: 2
+  }]
 }, {
   id: 2,
   nome: "Tamanho",
@@ -26,7 +30,16 @@ const initialLevels = [{
   maximo: 1,
   ativo: true,
   ordem: 2,
-  options: [{ optionId: 3, order: 1 }, { optionId: 4, order: 2 }, { optionId: 5, order: 3 }]
+  options: [{
+    optionId: 3,
+    order: 1
+  }, {
+    optionId: 4,
+    order: 2
+  }, {
+    optionId: 5,
+    order: 3
+  }]
 }, {
   id: 3,
   nome: "Ponto da Carne",
@@ -58,25 +71,63 @@ const initialLevels = [{
   maximo: 10,
   ativo: true,
   ordem: 6,
-  options: [{ optionId: 6, order: 1 }, { optionId: 7, order: 2 }]
+  options: [{
+    optionId: 6,
+    order: 1
+  }, {
+    optionId: 7,
+    order: 2
+  }]
 }];
 
 // Sample menu options for demonstration
-const menuOptions = [
-  { id: 1, nome: "Picanha", preco: "R$ 5,00", nivel: "Proteína", ativo: true },
-  { id: 2, nome: "Filé Mignon", preco: "R$ 7,00", nivel: "Proteína", ativo: true },
-  { id: 3, nome: "Pequeno", preco: "R$ 0,00", nivel: "Tamanho", ativo: true },
-  { id: 4, nome: "Médio", preco: "R$ 3,00", nivel: "Tamanho", ativo: true },
-  { id: 5, nome: "Grande", preco: "R$ 5,00", nivel: "Tamanho", ativo: false },
-  { id: 6, nome: "Batata Frita", preco: "R$ 8,00", nivel: "Adicionais", ativo: true },
-  { id: 7, nome: "Bacon Extra", preco: "R$ 4,00", nivel: "Adicionais", ativo: true },
-];
-
+const menuOptions = [{
+  id: 1,
+  nome: "Picanha",
+  preco: "R$ 5,00",
+  nivel: "Proteína",
+  ativo: true
+}, {
+  id: 2,
+  nome: "Filé Mignon",
+  preco: "R$ 7,00",
+  nivel: "Proteína",
+  ativo: true
+}, {
+  id: 3,
+  nome: "Pequeno",
+  preco: "R$ 0,00",
+  nivel: "Tamanho",
+  ativo: true
+}, {
+  id: 4,
+  nome: "Médio",
+  preco: "R$ 3,00",
+  nivel: "Tamanho",
+  ativo: true
+}, {
+  id: 5,
+  nome: "Grande",
+  preco: "R$ 5,00",
+  nivel: "Tamanho",
+  ativo: false
+}, {
+  id: 6,
+  nome: "Batata Frita",
+  preco: "R$ 8,00",
+  nivel: "Adicionais",
+  ativo: true
+}, {
+  id: 7,
+  nome: "Bacon Extra",
+  preco: "R$ 4,00",
+  nivel: "Adicionais",
+  ativo: true
+}];
 interface MenuLevelListProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
 }
-
 export function MenuLevelList({
   onEdit,
   onDelete
@@ -87,7 +138,6 @@ export function MenuLevelList({
   const {
     toast
   } = useToast();
-
   const handleEdit = (id: string | number) => {
     const level = levels.find(item => item.id.toString() === id.toString());
     if (level) {
@@ -99,7 +149,6 @@ export function MenuLevelList({
         active: level.ativo,
         options: level.options || []
       };
-      
       setEditingLevel({
         ...level,
         formData: levelFormData
@@ -107,7 +156,6 @@ export function MenuLevelList({
       setIsEditDialogOpen(true);
     }
   };
-
   const handleSaveEdit = (updatedLevelForm: any) => {
     const updatedLevel = {
       ...editingLevel,
@@ -117,21 +165,14 @@ export function MenuLevelList({
       ativo: updatedLevelForm.active,
       options: updatedLevelForm.options || []
     };
-    
-    const updatedLevels = levels.map(item => 
-      item.id === updatedLevel.id ? updatedLevel : item
-    );
-    
+    const updatedLevels = levels.map(item => item.id === updatedLevel.id ? updatedLevel : item);
     setLevels(updatedLevels);
-    
     toast({
       title: "Nível atualizado",
       description: `O nível '${updatedLevel.nome}' foi atualizado com sucesso.`
     });
-    
     setIsEditDialogOpen(false);
   };
-
   const moveItem = (id: number | string, direction: 'up' | 'down') => {
     const index = levels.findIndex(level => level.id === id);
     if (direction === 'up' && index === 0 || direction === 'down' && index === levels.length - 1) {
@@ -153,7 +194,6 @@ export function MenuLevelList({
       description: "A ordem dos níveis foi atualizada com sucesso."
     });
   };
-
   const duplicateLevel = (id: number | string) => {
     const levelToDuplicate = levels.find(level => level.id === id);
     if (!levelToDuplicate) return;
@@ -174,12 +214,11 @@ export function MenuLevelList({
 
   // Sort levels by order before rendering
   const sortedLevels = [...levels].sort((a, b) => a.ordem - b.ordem);
-  
+
   // Get option count for each level
   const getOptionCount = (level: any) => {
     return level.options ? level.options.length : 0;
   };
-  
   return <>
       <Card>
         <CardContent className="p-0">
@@ -209,22 +248,8 @@ export function MenuLevelList({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={() => moveItem(level.id, 'up')}
-                        disabled={sortedLevels.indexOf(level) === 0}
-                      >
-                        <ArrowUp className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={() => moveItem(level.id, 'down')}
-                        disabled={sortedLevels.indexOf(level) === sortedLevels.length - 1}
-                      >
-                        <ArrowDown className="h-4 w-4" />
-                      </Button>
+                      
+                      
                       
                       <Button variant="outline" size="icon" onClick={() => duplicateLevel(level.id)}>
                         <Copy className="h-4 w-4" />
@@ -244,16 +269,6 @@ export function MenuLevelList({
       </Card>
       
       {/* Use LevelDialog instead of inline edit form */}
-      {editingLevel && (
-        <LevelDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          onSave={handleSaveEdit}
-          onDelete={() => onDelete && onDelete(editingLevel.id.toString())}
-          editMode={true}
-          initialData={editingLevel.formData}
-          availableOptions={menuOptions}
-        />
-      )}
+      {editingLevel && <LevelDialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} onSave={handleSaveEdit} onDelete={() => onDelete && onDelete(editingLevel.id.toString())} editMode={true} initialData={editingLevel.formData} availableOptions={menuOptions} />}
     </>;
 }
