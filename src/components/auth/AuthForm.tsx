@@ -27,10 +27,11 @@ export default function AuthForm() {
 
       console.log("Attempting login with:", { email });
       await login(email, password);
-      
-      // Login is successful - No need to navigate here, the AuthContext will handle navigation
-      // based on the user role after it successfully loads the profile
       toast.success("Login realizado com sucesso!");
+      
+      // Redirect will be handled by the Index component via useEffect that monitors auth state
+      console.log("Login successful, navigation will be handled by Index component");
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       console.error("Login form error:", error);
       toast.error("Erro: " + (error instanceof Error ? error.message : "Credenciais inválidas"));

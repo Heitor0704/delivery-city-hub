@@ -39,7 +39,6 @@ import AdminRegistrations from "@/pages/admin/Registrations";
 import AdminFinancials from "@/pages/admin/Financials";
 import AdminReports from "@/pages/admin/Reports";
 import AdminSettings from "@/pages/admin/Settings";
-import CreateTestUsers from "@/pages/admin/CreateTestUsers"; // Nova importação
 
 const queryClient = new QueryClient();
 
@@ -74,27 +73,6 @@ const DashboardRedirect = () => {
   }
 };
 
-const Root = () => {
-  const { isAuthenticated, user } = useAuth();
-  
-  // Redireciona automaticamente para o dashboard adequado se já estiver autenticado
-  if (isAuthenticated && user) {
-    switch (user.role) {
-      case "owner":
-        return <Navigate to="/owner-dashboard" replace />;
-      case "cityManager":
-        return <Navigate to="/city-manager-dashboard" replace />;
-      case "admin":
-        return <Navigate to="/admin-dashboard" replace />;
-      default:
-        return <Navigate to="/" replace />;
-    }
-  }
-  
-  // Renderiza a página de login se não estiver autenticado
-  return <LoginPage />;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -104,11 +82,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Rotas públicas */}
-            <Route path="/" element={<Root />} />
+            <Route path="/" element={<LoginPage />} />
             <Route path="/logout" element={<LogoutPage />} />
-            
-            {/* Rota pública para criação de usuários de teste */}
-            <Route path="/create-test-users" element={<CreateTestUsers />} />
 
             {/* Rotas protegidas - Shared Layout */}
             <Route 
@@ -149,7 +124,6 @@ const App = () => (
               <Route path="/admin/financials" element={<AdminFinancials />} />
               <Route path="/admin/reports" element={<AdminReports />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
-              <Route path="/admin/create-test-users" element={<CreateTestUsers />} />
 
               {/* Rotas compartilhadas - Removida a rota de perfil */}
               <Route path="/settings" element={<Navigate to="/dashboard" replace />} />
