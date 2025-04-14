@@ -13,6 +13,7 @@ import OwnerDashboard from "@/pages/OwnerDashboard";
 import CityManagerDashboard from "@/pages/CityManagerDashboard";
 import AdminDashboard from "@/pages/AdminDashboard";
 import NotFoundPage from "@/pages/NotFoundPage";
+import Index from "@/pages/Index";
 
 // Owner pages
 import OwnerOrders from "@/pages/owner/Orders";
@@ -84,6 +85,7 @@ const App = () => (
             {/* Rotas públicas */}
             <Route path="/" element={<LoginPage />} />
             <Route path="/logout" element={<LogoutPage />} />
+            <Route path="/index" element={<Index />} />
 
             {/* Rotas protegidas - Shared Layout */}
             <Route 

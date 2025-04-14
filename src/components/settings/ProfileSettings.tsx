@@ -12,7 +12,7 @@ import { Camera, Loader2 } from 'lucide-react';
 export function ProfileSettings() {
   const { user, updateUser } = useAuth();
   const { toast } = useToast();
-  const [name, setName] = useState(user?.name || '');
+  const [name, setName] = useState(user?.full_name || '');
   const [avatar, setAvatar] = useState<string | null>(user?.avatar || null);
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
@@ -44,12 +44,14 @@ export function ProfileSettings() {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Update user in context
-      updateUser({
-        ...user!,
-        name,
-        avatar: avatar || undefined,
-      });
+      // Update user in context (ensuring we maintain all other properties)
+      if (user) {
+        updateUser({
+          ...user,
+          full_name: name,
+          avatar: avatar || undefined,
+        });
+      }
       
       toast({
         title: "Perfil atualizado",
