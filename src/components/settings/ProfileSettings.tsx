@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Loader2 } from 'lucide-react';
+import { supabase } from "@/integrations/supabase/client";
 
 export function ProfileSettings() {
   const { user, updateUser } = useAuth();
@@ -17,7 +18,7 @@ export function ProfileSettings() {
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setFile(selectedFile);
@@ -35,20 +36,48 @@ export function ProfileSettings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
+    
     setIsLoading(true);
     
     try {
-      // In a real app, you would upload the file to a server/storage
-      // and get back a URL to set in the user profile
+      let avatarUrl = user.avatar;
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Upload avatar if a file was selected
+      if (file) {
+        const fileExt = file.name.split('.').pop();
+        const filePath = `avatars/${user.id}-${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError, data } = await supabase.storage
+          .from('profiles')
+          .upload(filePath, file, {
+            upsert: true,
+          });
+          
+        if (uploadError) throw uploadError;
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage.from('profiles').getPublicUrl(filePath);
+        avatarUrl = urlData.publicUrl;
+      }
+      
+      // Update user in Supabase
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: name,
+          avatar: avatarUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
       
       // Update user in context
       updateUser({
-        ...user!,
+        ...user,
         full_name: name,
-        avatar: avatar || undefined,
+        avatar: avatarUrl,
       });
       
       toast({
@@ -56,6 +85,7 @@ export function ProfileSettings() {
         description: "Suas informações de perfil foram atualizadas com sucesso.",
       });
     } catch (error) {
+      console.error('Error updating profile:', error);
       toast({
         title: "Erro ao atualizar",
         description: "Ocorreu um erro ao atualizar seu perfil. Tente novamente.",
@@ -86,7 +116,7 @@ export function ProfileSettings() {
               <Avatar className="w-24 h-24">
                 <AvatarImage src={avatar || ""} />
                 <AvatarFallback className="text-xl bg-fomex-orange text-white">
-                  {getInitials(name || user?.email || "")}
+                  {getInitials(name || user?.full_name || "")}
                 </AvatarFallback>
               </Avatar>
               

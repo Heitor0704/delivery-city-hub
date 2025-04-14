@@ -18,6 +18,8 @@ export type UserProfile = {
   id: string;
   full_name?: string;
   role: 'owner' | 'cityManager' | 'admin' | 'customer';
+  avatar?: string;  // Added avatar property
+  email?: string;   // Added email property
 };
 
 // Custom error type for authentication errors
@@ -53,5 +55,9 @@ export const getUserProfile = async () => {
     return null;
   }
   
-  return data as UserProfile;
+  // Include email from auth session in the profile
+  return { 
+    ...data as UserProfile,
+    email: session.user.email 
+  };
 };

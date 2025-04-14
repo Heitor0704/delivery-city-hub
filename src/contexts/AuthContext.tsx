@@ -37,7 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 .single();
                 
               if (error) throw error;
-              setUser(data as UserProfile);
+              
+              // Merge auth data (email) with profile data
+              setUser({
+                ...data as UserProfile,
+                email: session.user.email
+              });
             } catch (error) {
               console.error('Error fetching profile:', error);
               setUser(null);
@@ -64,7 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               console.error('Error fetching profile:', error);
               return;
             }
-            setUser(data as UserProfile);
+            
+            // Merge auth data with profile data
+            setUser({
+              ...data as UserProfile,
+              email: session.user.email
+            });
           });
       }
     });
@@ -104,6 +114,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Function to update user data
   const updateUser = (userData: UserProfile) => {
     setUser(userData);
+    
+    // Also update in database if this contains profile data
+    if (userData.id) {
+      const { email, ...profileData } = userData;
+      
+      supabase
+        .from('profiles')
+        .update(profileData)
+        .eq('id', userData.id)
+        .then(({ error }) => {
+          if (error) {
+            console.error('Error updating profile:', error);
+            toast.error("Erro ao atualizar o perfil");
+          }
+        });
+    }
   };
 
   return (
