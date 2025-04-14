@@ -11,30 +11,43 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Trash } from "lucide-react";
 
 interface OptionFormData {
   name: string;
   price: string;
   level: string;
   active: boolean;
+  order?: string;
 }
 
 interface OptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (optionData: OptionFormData) => void;
+  editMode?: boolean;
+  initialData?: OptionFormData;
 }
 
-export function OptionDialog({ open, onOpenChange, onSave }: OptionDialogProps) {
-  const [optionForm, setOptionForm] = useState<OptionFormData>({
-    name: "",
-    price: "",
-    level: "",
-    active: true,
-  });
+export function OptionDialog({ 
+  open, 
+  onOpenChange, 
+  onSave, 
+  editMode = false,
+  initialData
+}: OptionDialogProps) {
+  const [optionForm, setOptionForm] = useState<OptionFormData>(
+    initialData || {
+      name: "",
+      price: "0,00",
+      level: "",
+      active: true,
+      order: "1"
+    }
+  );
 
   const { toast } = useToast();
 
@@ -56,85 +69,139 @@ export function OptionDialog({ open, onOpenChange, onSave }: OptionDialogProps) 
     // Pass data back to parent
     onSave(optionForm);
     
-    // Reset form and close dialog
-    setOptionForm({ name: "", price: "", level: "", active: true });
+    // Reset form if not in edit mode
+    if (!editMode) {
+      setOptionForm({ name: "", price: "0,00", level: "", active: true, order: "1" });
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
-          <DialogTitle>Adicionar Opção</DialogTitle>
+          <DialogTitle className="flex items-center text-fomex-orange">
+            <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
+              <path d="M2 0H14C15.1 0 16 0.9 16 2V18C16 19.1 15.1 20 14 20H2C0.9 20 0 19.1 0 18V2C0 0.9 0.9 0 2 0ZM2 2V18H14V2H2ZM7 14H9V16H7V14ZM7 4H9V12H7V4Z" fill="#f97316"/>
+            </svg>
+            {editMode ? "Editar Opção" : "Opções de Nível de Cardápio"}
+          </DialogTitle>
           <DialogDescription>
-            Crie uma nova opção para seus produtos.
+            {editMode 
+              ? "Edite os detalhes desta opção do cardápio." 
+              : "Crie uma nova opção para seus produtos."}
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="option-name" className="text-right">
-              Nome
+        
+        <div className="grid gap-6 py-4">
+          <div className="grid grid-cols-1 gap-3">
+            <Label htmlFor="option-name" className="font-medium text-gray-700">
+              Nome:
             </Label>
             <Input
               id="option-name"
               placeholder="Nome da opção"
               value={optionForm.name}
               onChange={(e) => handleOptionChange("name", e.target.value)}
-              className="col-span-3"
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="option-price" className="text-right">
-              Preço adicional (R$)
+          
+          <div className="grid grid-cols-1 gap-3">
+            <Label htmlFor="option-level" className="font-medium text-gray-700">
+              Nível de Cardápio:
             </Label>
-            <Input
-              id="option-price"
-              type="text"
-              placeholder="0.00"
-              value={optionForm.price}
-              onChange={(e) => handleOptionChange("price", e.target.value)}
-              className="col-span-3"
-            />
+            <Select
+              value={optionForm.level}
+              onValueChange={(value) => handleOptionChange("level", value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Escolha um nível" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Escolha um arroz">Escolha um arroz</SelectItem>
+                <SelectItem value="Escolha um feijão">Escolha um feijão</SelectItem>
+                <SelectItem value="Escolha uma carne">Escolha uma carne</SelectItem>
+                <SelectItem value="Tamanho">Tamanho</SelectItem>
+                <SelectItem value="Ponto da Carne">Ponto da Carne</SelectItem>
+                <SelectItem value="Acompanhamentos">Acompanhamentos</SelectItem>
+                <SelectItem value="Molhos">Molhos</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="option-level" className="text-right">
-              Nível
-            </Label>
-            <div className="col-span-3">
-              <Select
-                value={optionForm.level}
-                onValueChange={(value) => handleOptionChange("level", value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o nível" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Proteína">Proteína</SelectItem>
-                  <SelectItem value="Tamanho">Tamanho</SelectItem>
-                  <SelectItem value="Ponto da Carne">Ponto da Carne</SelectItem>
-                  <SelectItem value="Acompanhamentos">Acompanhamentos</SelectItem>
-                  <SelectItem value="Molhos">Molhos</SelectItem>
-                </SelectContent>
-              </Select>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="option-price" className="font-medium text-gray-700">
+                Valor (R$)
+              </Label>
+              <Input
+                id="option-price"
+                type="text"
+                placeholder="0,00"
+                value={optionForm.price}
+                onChange={(e) => handleOptionChange("price", e.target.value)}
+              />
             </div>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="option-active" className="text-right">
-              Ativo
-            </Label>
-            <div className="col-span-3 flex items-center">
-              <Switch
-                id="option-active"
-                checked={optionForm.active}
-                onCheckedChange={(checked) => handleOptionChange("active", checked)}
+            
+            <div className="space-y-2">
+              <Label htmlFor="option-order" className="font-medium text-gray-700">
+                Ordem <span className="text-xs text-gray-500">(Será mostrado em ordem crescente)</span>
+              </Label>
+              <Input
+                id="option-order"
+                type="number"
+                min="1"
+                placeholder="1"
+                value={optionForm.order || "1"}
+                onChange={(e) => handleOptionChange("order", e.target.value)}
               />
             </div>
           </div>
+          
+          <div className="grid grid-cols-1 gap-3">
+            <Label className="font-medium text-gray-700">Ativo?</Label>
+            <RadioGroup
+              value={optionForm.active ? "sim" : "nao"}
+              onValueChange={(value) => handleOptionChange("active", value === "sim")}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="sim" id="active-yes" />
+                <Label htmlFor="active-yes">Sim</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="nao" id="active-no" />
+                <Label htmlFor="active-no">Não</Label>
+              </div>
+            </RadioGroup>
+          </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={handleSaveOption}>Salvar</Button>
+        
+        <DialogFooter className="flex justify-between space-x-4">
+          {editMode && (
+            <Button 
+              variant="destructive" 
+              onClick={() => onOpenChange(false)}
+              className="flex items-center"
+            >
+              <Trash className="mr-2 h-4 w-4" />
+              Excluir Opção de Nível
+            </Button>
+          )}
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="border-gray-300"
+            >
+              Cancelar
+            </Button>
+            <Button 
+              onClick={handleSaveOption}
+              className="bg-fomex-orange hover:bg-fomex-orange/90"
+            >
+              {editMode ? "Editar Opção de Nível" : "Salvar"}
+            </Button>
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
