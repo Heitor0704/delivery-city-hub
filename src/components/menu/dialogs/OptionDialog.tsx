@@ -17,16 +17,20 @@ interface OptionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (optionData: OptionFormData) => void;
+  onDelete?: () => void;
   editMode?: boolean;
   initialData?: OptionFormData;
+  availableLevels?: {id: string, name: string}[];
 }
 
 export function OptionDialog({ 
   open, 
   onOpenChange, 
-  onSave, 
+  onSave,
+  onDelete,
   editMode = false,
-  initialData
+  initialData,
+  availableLevels = []
 }: OptionDialogProps) {
   const [optionForm, setOptionForm] = useState<OptionFormData>(
     initialData || {
@@ -63,15 +67,17 @@ export function OptionDialog({
     }
   };
 
-  // Lista de níveis disponíveis
-  const menuLevels = [
-    { id: "1", name: "Proteína" },
-    { id: "2", name: "Tamanho" },
-    { id: "3", name: "Ponto da Carne" },
-    { id: "4", name: "Acompanhamentos" },
-    { id: "5", name: "Molhos" },
-    { id: "6", name: "Adicionais" },
-  ];
+  // Use provided levels or default ones
+  const menuLevels = availableLevels.length > 0 
+    ? availableLevels 
+    : [
+        { id: "1", name: "Proteína" },
+        { id: "2", name: "Tamanho" },
+        { id: "3", name: "Ponto da Carne" },
+        { id: "4", name: "Acompanhamentos" },
+        { id: "5", name: "Molhos" },
+        { id: "6", name: "Adicionais" },
+      ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -88,6 +94,7 @@ export function OptionDialog({
           editMode={editMode}
           onCancel={() => onOpenChange(false)}
           onSave={handleSaveOption}
+          onDelete={onDelete}
         />
       </DialogContent>
     </Dialog>

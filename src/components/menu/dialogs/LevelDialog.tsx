@@ -11,10 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
-import { Trash } from "lucide-react";
+import { Trash, Save, Layers } from "lucide-react";
 
 interface LevelFormData {
   name: string;
@@ -28,6 +27,7 @@ interface LevelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (levelData: LevelFormData) => void;
+  onDelete?: () => void;
   editMode?: boolean;
   initialData?: LevelFormData;
 }
@@ -36,6 +36,7 @@ export function LevelDialog({
   open, 
   onOpenChange, 
   onSave, 
+  onDelete,
   editMode = false,
   initialData
 }: LevelDialogProps) {
@@ -89,15 +90,13 @@ export function LevelDialog({
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
           <DialogTitle className="flex items-center text-fomex-orange">
-            <svg width="16" height="20" viewBox="0 0 16 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-2">
-              <path d="M2 0H14C15.1 0 16 0.9 16 2V18C16 19.1 15.1 20 14 20H2C0.9 20 0 19.1 0 18V2C0 0.9 0.9 0 2 0ZM2 2V18H14V2H2ZM7 14H9V16H7V14ZM7 4H9V12H7V4Z" fill="#f97316"/>
-            </svg>
-            {editMode ? "Editar Nível" : "Nível de Cardápio"}
+            <Layers className="mr-2 h-5 w-5" />
+            {editMode ? "Editar Nível" : "Novo Nível do Cardápio"}
           </DialogTitle>
           <DialogDescription>
             {editMode 
               ? "Edite os detalhes deste nível do cardápio." 
-              : "Crie um novo nível para personalizar seus produtos."}
+              : "Crie um novo nível para organizar as opções do seu cardápio."}
           </DialogDescription>
         </DialogHeader>
         
@@ -108,7 +107,7 @@ export function LevelDialog({
             </Label>
             <Input
               id="level-name"
-              placeholder="Escolha um tipo..."
+              placeholder="Ex: Proteínas, Tamanhos, Acompanhamentos..."
               value={levelForm.name}
               onChange={(e) => handleLevelChange("name", e.target.value)}
             />
@@ -188,10 +187,10 @@ export function LevelDialog({
         </div>
         
         <DialogFooter className="flex justify-between space-x-4">
-          {editMode && (
+          {editMode && onDelete && (
             <Button 
               variant="destructive" 
-              onClick={() => onOpenChange(false)}
+              onClick={onDelete}
               className="flex items-center"
             >
               <Trash className="mr-2 h-4 w-4" />
@@ -208,9 +207,10 @@ export function LevelDialog({
             </Button>
             <Button 
               onClick={handleSaveLevel}
-              className="bg-fomex-orange hover:bg-fomex-orange/90"
+              className="bg-fomex-orange hover:bg-fomex-orange/90 flex items-center"
             >
-              {editMode ? "Editar Nível" : "Salvar"}
+              <Save className="mr-2 h-4 w-4" />
+              {editMode ? "Atualizar Nível" : "Criar Nível"}
             </Button>
           </div>
         </DialogFooter>

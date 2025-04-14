@@ -1,25 +1,26 @@
 
 import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
-import { Trash } from "lucide-react";
+import { Trash, Save } from "lucide-react";
 
 interface OptionDialogFooterProps {
   editMode: boolean;
   onCancel: () => void;
   onSave: () => void;
+  onDelete?: () => void;
 }
 
-export function OptionDialogFooter({ editMode, onCancel, onSave }: OptionDialogFooterProps) {
+export function OptionDialogFooter({ editMode, onCancel, onSave, onDelete }: OptionDialogFooterProps) {
   return (
     <DialogFooter className="flex justify-between space-x-4">
-      {editMode && (
+      {editMode && onDelete && (
         <Button 
           variant="destructive" 
-          onClick={onCancel}
+          onClick={onDelete}
           className="flex items-center"
         >
           <Trash className="mr-2 h-4 w-4" />
-          Excluir Opção de Nível
+          Excluir Opção
         </Button>
       )}
       <div className="flex space-x-2">
@@ -32,9 +33,10 @@ export function OptionDialogFooter({ editMode, onCancel, onSave }: OptionDialogF
         </Button>
         <Button 
           onClick={onSave}
-          className="bg-fomex-orange hover:bg-fomex-orange/90"
+          className="bg-fomex-orange hover:bg-fomex-orange/90 flex items-center"
         >
-          {editMode ? "Editar Opção de Nível" : "Salvar"}
+          <Save className="mr-2 h-4 w-4" />
+          {editMode ? "Atualizar Opção" : "Criar Opção"}
         </Button>
       </div>
     </DialogFooter>
