@@ -10,7 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function AuthForm() {
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -27,10 +27,10 @@ export default function AuthForm() {
 
       console.log("Attempting login with:", { email });
       await login(email, password);
-      toast.success("Login realizado com sucesso!");
       
-      // Redirecionar para o dashboard apropriado diretamente
-      navigate('/dashboard', { replace: true });
+      // Login is successful - No need to navigate here, the AuthContext will handle navigation
+      // based on the user role after it successfully loads the profile
+      toast.success("Login realizado com sucesso!");
     } catch (error) {
       console.error("Login form error:", error);
       toast.error("Erro: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
