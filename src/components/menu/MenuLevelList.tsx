@@ -112,19 +112,6 @@ function LevelEditForm({ level, open, onOpenChange, onSave }: LevelEditFormProps
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="ordem" className="text-right">
-              Ordem
-            </Label>
-            <Input 
-              id="ordem" 
-              type="number"
-              min="1" 
-              value={editedLevel.ordem} 
-              onChange={(e) => handleChange("ordem", parseInt(e.target.value, 10) || 1)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="active" className="text-right">
               Ativo
             </Label>

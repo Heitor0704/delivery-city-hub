@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -94,19 +95,6 @@ function OptionEditForm({ option, open, onOpenChange, onSave }: OptionEditFormPr
               id="price" 
               value={editedOption.preco.replace("R$ ", "")} 
               onChange={(e) => handleChange("preco", `R$ ${e.target.value}`)}
-              className="col-span-3" 
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="ordem" className="text-right">
-              Ordem
-            </Label>
-            <Input 
-              id="ordem" 
-              type="number"
-              min="1" 
-              value={editedOption.ordem} 
-              onChange={(e) => handleChange("ordem", parseInt(e.target.value, 10) || 1)}
               className="col-span-3" 
             />
           </div>

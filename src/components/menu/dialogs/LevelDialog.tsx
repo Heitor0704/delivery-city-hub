@@ -21,7 +21,6 @@ interface LevelFormData {
   min: string;
   max: string;
   active: boolean;
-  order?: string;
   isAddon?: boolean;
 }
 
@@ -46,7 +45,6 @@ export function LevelDialog({
       min: "0",
       max: "1",
       active: true,
-      order: "1",
       isAddon: false
     }
   );
@@ -82,7 +80,7 @@ export function LevelDialog({
     
     // Reset form if not in edit mode
     if (!editMode) {
-      setLevelForm({ name: "", min: "0", max: "1", active: true, order: "1", isAddon: false });
+      setLevelForm({ name: "", min: "0", max: "1", active: true, isAddon: false });
     }
   };
 
@@ -168,20 +166,6 @@ export function LevelDialog({
                 onChange={(e) => handleLevelChange("max", e.target.value)}
               />
             </div>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-3">
-            <Label htmlFor="level-order" className="font-medium text-gray-700">
-              Ordem <span className="text-xs text-gray-500">(Serão mostrados em ordem crescente)</span>
-            </Label>
-            <Input
-              id="level-order"
-              type="number"
-              min="1"
-              placeholder="1"
-              value={levelForm.order || "1"}
-              onChange={(e) => handleLevelChange("order", e.target.value)}
-            />
           </div>
           
           <div className="grid grid-cols-1 gap-3">

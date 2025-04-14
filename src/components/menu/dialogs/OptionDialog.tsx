@@ -21,7 +21,6 @@ interface OptionFormData {
   price: string;
   level: string;
   active: boolean;
-  order?: string;
 }
 
 interface OptionDialogProps {
@@ -45,7 +44,6 @@ export function OptionDialog({
       price: "0,00",
       level: "",
       active: true,
-      order: "1"
     }
   );
 
@@ -71,7 +69,7 @@ export function OptionDialog({
     
     // Reset form if not in edit mode
     if (!editMode) {
-      setOptionForm({ name: "", price: "0,00", level: "", active: true, order: "1" });
+      setOptionForm({ name: "", price: "0,00", level: "", active: true });
     }
   };
 
@@ -134,33 +132,17 @@ export function OptionDialog({
             </Select>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="option-price" className="font-medium text-gray-700">
-                Valor (R$)
-              </Label>
-              <Input
-                id="option-price"
-                type="text"
-                placeholder="0,00"
-                value={optionForm.price}
-                onChange={(e) => handleOptionChange("price", e.target.value)}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="option-order" className="font-medium text-gray-700">
-                Ordem <span className="text-xs text-gray-500">(Será mostrado em ordem crescente)</span>
-              </Label>
-              <Input
-                id="option-order"
-                type="number"
-                min="1"
-                placeholder="1"
-                value={optionForm.order || "1"}
-                onChange={(e) => handleOptionChange("order", e.target.value)}
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-3">
+            <Label htmlFor="option-price" className="font-medium text-gray-700">
+              Valor (R$)
+            </Label>
+            <Input
+              id="option-price"
+              type="text"
+              placeholder="0,00"
+              value={optionForm.price}
+              onChange={(e) => handleOptionChange("price", e.target.value)}
+            />
           </div>
           
           <div className="grid grid-cols-1 gap-3">
