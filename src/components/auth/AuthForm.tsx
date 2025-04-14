@@ -27,12 +27,9 @@ export default function AuthForm() {
 
       console.log("Attempting login with:", { email });
       await login(email, password);
-      toast.success("Login realizado com sucesso!");
       
-      // After successful login, navigate to dashboard
-      // The Index component will handle the proper redirection based on role
-      console.log("Login successful, navigating to /dashboard");
-      navigate('/dashboard');
+      // After successful login, navigate to index which will handle redirections
+      navigate('/index');
     } catch (error) {
       console.error("Login form error:", error);
       toast.error("Erro: " + (error instanceof Error ? error.message : "Credenciais inválidas"));
@@ -41,7 +38,8 @@ export default function AuthForm() {
     }
   };
 
-  return <Card className="w-[380px] shadow-lg bg-white/95 border-none rounded-lg overflow-hidden">
+  return (
+    <Card className="w-[380px] shadow-lg bg-white/95 border-none rounded-lg overflow-hidden">
       <CardContent className="p-0">
         <div className="flex flex-col items-center p-6 pb-0">
           <div className="mb-6 flex flex-col items-center">
@@ -62,6 +60,15 @@ export default function AuthForm() {
             {isLoading ? "Processando..." : "ENTRAR"}
           </Button>
           
+          <div className="mt-4 text-center text-sm text-gray-600">
+            <p>Demonstração: Use as credenciais abaixo</p>
+            <ul className="mt-2 space-y-1">
+              <li>owner@fomex.com / 123456</li>
+              <li>manager@fomex.com / 123456</li>
+              <li>admin@fomex.com / 123456</li>
+            </ul>
+          </div>
+          
           <div className="flex justify-center mt-4">
             <button type="button" className="text-orange-600 hover:text-orange-800 text-sm" onClick={() => toast.info("Função de recuperar senha em desenvolvimento")}>
               Esqueci minha senha
@@ -69,5 +76,6 @@ export default function AuthForm() {
           </div>
         </form>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 }

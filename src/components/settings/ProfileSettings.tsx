@@ -38,9 +38,6 @@ export function ProfileSettings() {
     setIsLoading(true);
     
     try {
-      // In a real app, you would upload the file to a server/storage
-      // and get back a URL to set in the user profile
-      
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       

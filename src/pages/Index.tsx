@@ -33,8 +33,8 @@ const Index = () => {
           navigate('/', { replace: true });
       }
     } else if (!isAuthenticated) {
-      console.log("User not authenticated, staying on login page");
-      // Stay on current page (login) if user is not authenticated
+      console.log("User not authenticated, redirecting to login page");
+      navigate('/', { replace: true });
     }
   }, [isAuthenticated, user, navigate]);
 

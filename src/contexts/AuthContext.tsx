@@ -1,8 +1,54 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { supabase, UserProfile, AuthError } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+// Define user profile type without Supabase dependency
+export type UserRole = 'owner' | 'cityManager' | 'admin' | 'customer';
+
+export interface UserProfile {
+  id: string;
+  full_name?: string;
+  role: UserRole;
+  email?: string;
+  avatar?: string;
+}
+
+// Mock users for demonstration
+const DEMO_USERS = [
+  {
+    email: "owner@fomex.com",
+    password: "123456",
+    profile: {
+      id: "1",
+      full_name: "João Silva",
+      role: "owner" as UserRole,
+      email: "owner@fomex.com",
+      avatar: "/lovable-uploads/8724e30c-5320-4840-9c82-f95d7aa3af29.png"
+    }
+  },
+  {
+    email: "manager@fomex.com",
+    password: "123456",
+    profile: {
+      id: "2",
+      full_name: "Maria Oliveira",
+      role: "cityManager" as UserRole,
+      email: "manager@fomex.com",
+      avatar: ""
+    }
+  },
+  {
+    email: "admin@fomex.com",
+    password: "123456",
+    profile: {
+      id: "3",
+      full_name: "Carlos Ferreira",
+      role: "admin" as UserRole,
+      email: "admin@fomex.com",
+      avatar: ""
+    }
+  }
+];
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -16,123 +62,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const isAuthenticated = !!user;
-
-  // Initialize auth state from localStorage and set up listener
+  
+  // Load user from localStorage on initial render
   useEffect(() => {
-    console.log("AuthProvider: Setting up auth state listener");
-    
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state changed:", event, currentSession?.user?.id);
-        setSession(currentSession);
-        
-        if (currentSession?.user) {
-          // Defer profile fetch with setTimeout to avoid deadlocks
-          setTimeout(async () => {
-            try {
-              console.log("Fetching profile for user:", currentSession.user.id);
-              const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', currentSession.user.id)
-                .single();
-                
-              if (error) {
-                console.error('Error fetching profile:', error);
-                setUser(null);
-                return;
-              }
-              
-              // Add email from session to profile data
-              const profile = {
-                ...data,
-                email: currentSession.user.email
-              } as UserProfile;
-              
-              console.log("Profile fetched successfully:", profile);
-              setUser(profile);
-            } catch (error) {
-              console.error('Error in profile fetch:', error);
-              setUser(null);
-            }
-          }, 0);
-        } else {
-          console.log("No session user, setting user to null");
-          setUser(null);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    const initializeAuth = async () => {
+    const storedUser = localStorage.getItem('fomex_user');
+    if (storedUser) {
       try {
-        console.log("Checking for existing session");
-        const { data: { session: existingSession }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error("Error getting session:", error);
-          return;
-        }
-        
-        setSession(existingSession);
-        
-        if (existingSession?.user) {
-          console.log("Found existing session, fetching profile");
-          try {
-            const { data, error: profileError } = await supabase
-              .from('profiles')
-              .select('*')
-              .eq('id', existingSession.user.id)
-              .single();
-            
-            if (profileError) {
-              console.error('Error fetching profile:', profileError);
-              return;
-            }
-            
-            // Add email from session to profile data
-            const profile = {
-              ...data,
-              email: existingSession.user.email
-            } as UserProfile;
-            
-            console.log("Setting user from existing session:", profile);
-            setUser(profile);
-          } catch (error) {
-            console.error('Error in initial profile fetch:', error);
-          }
-        }
+        setUser(JSON.parse(storedUser));
       } catch (error) {
-        console.error("Error in auth initialization:", error);
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('fomex_user');
       }
-    };
-    
-    initializeAuth();
-
-    return () => {
-      console.log("Cleaning up auth state listener");
-      subscription.unsubscribe();
-    };
+    }
   }, []);
 
-  // Function to handle login
+  // Mock login function
   const login = async (email: string, password: string) => {
     try {
-      console.log("Attempting login for:", email);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      // Find user in the mock data
+      const foundUser = DEMO_USERS.find(
+        (u) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+      );
+
+      if (!foundUser) {
+        throw new Error("Credenciais inválidas");
+      }
+
+      // Set user in state and localStorage
+      setUser(foundUser.profile);
+      localStorage.setItem('fomex_user', JSON.stringify(foundUser.profile));
       
-      if (error) throw new AuthError(error.message);
-      
-      // The profile will be set by the onAuthStateChange listener
       console.log("Login successful for:", email);
       toast.success("Login realizado com sucesso!");
-      // Return void instead of the data to match the function signature
     } catch (error) {
       console.error("Login error:", error);
       toast.error(error instanceof Error ? error.message : "Falha no login");
@@ -140,20 +102,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Function to handle logout
+  // Mock logout function
   const logout = () => {
-    supabase.auth.signOut().then(() => {
-      setUser(null);
-      toast.success("Sessão encerrada");
-    }).catch(error => {
-      console.error("Logout error:", error);
-      toast.error("Erro ao encerrar sessão");
-    });
+    setUser(null);
+    localStorage.removeItem('fomex_user');
+    toast.success("Sessão encerrada");
   };
 
-  // Function to update user data
+  // Update user data
   const updateUser = (userData: UserProfile) => {
     setUser(userData);
+    localStorage.setItem('fomex_user', JSON.stringify(userData));
   };
 
   return (
